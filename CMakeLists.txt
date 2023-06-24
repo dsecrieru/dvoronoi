@@ -11,7 +11,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(ref_std_generator)
 
-add_library(dvoronoi INTERFACE fortune/algorithm.hpp common/diagram.hpp fortune/beachline.hpp fortune/beachline.hpp common/util.hpp fortune/event_queue.hpp fortune/event_queue.hpp benchmark/benchmark.cpp)
+add_library(dvoronoi INTERFACE
+        common/util.hpp
+        common/diagram.hpp
+        fortune/algorithm.hpp
+        fortune/beach_line.hpp
+        fortune/event_queue.hpp
+        fortune/arc.hpp
+        fortune/arc_tree.hpp)
 
 target_include_directories(dvoronoi INTERFACE ${stdgenerator_SOURCE_DIR}/include ..)
 target_include_directories(dvoronoi INTERFACE ..)

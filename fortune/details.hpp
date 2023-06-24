@@ -8,44 +8,186 @@
 #include <variant>
 #include <deque>
 #include <queue>
+#include <cassert>
 
 #include "event_queue.hpp"
-#include "beachline.hpp"
+#include "beach_line.hpp"
 
 namespace dvoronoi::fortune::_details {
 
-    template<typename point2d_t>
-    void insert_arc(beachline_implementation_t<point2d_t>& beachline, const point2d_t& new_site,
-                    event_queue_t<point2d_t>& event_queue, diagram_t<point2d_t>& diagram) {
-        insert_visitor<point2d_t> inserter{ new_site, event_queue, diagram };
-        std::visit(inserter, beachline);
+    template<typename arc_t>
+    void add_edge(arc_t* left, arc_t* right, auto& diagram) {
+        left->right_half_edge = diagram.create_half_edge(left->site->face);
+        right->left_half_edge = diagram.create_half_edge(right->site->face);
+
+        left->right_half_edge->twin = right->left_half_edge;
+        right->left_half_edge->twin = left->right_half_edge;
     }
 
-    template<typename point2d_t>
-    void remove_arc(beachline_implementation_t<point2d_t>& beachline, const event_t<point2d_t>& event,
-                    event_queue_t<point2d_t>& event_queue, diagram_t<point2d_t>& diagram) {
-        remove_visitor<point2d_t> remover{ event.event_point, event.circle_data.value(), event_queue, diagram };
-        std::visit(remover, beachline);
+    template<typename point_t>
+    auto compute_convergence_point(const point_t& p1, const point_t& p2, const point_t& p3) -> std::optional<point_t> {
+        auto v1 = util::ortho(util::diff(p1, p2));
+        auto v2 = util::ortho(util::diff(p2, p3));
+        auto delta = util::mult(0.5f, util::diff(p3, p1));
+        auto denom = util::determinant(v1, v2);
+
+        if (util::is_zero(denom))
+            return std::nullopt;
+
+        auto t = util::determinant(delta, v2) / denom;
+        auto center = util::add(util::mult(0.5f, util::add(p1, p2)),
+                                util::mult(t, v1));
+
+        return center;
     }
 
-    template<typename point2d_t>
-    auto generate(event_queue_t<point2d_t>& event_queue) -> diagram_t<point2d_t> {
+    template<typename event_t>
+    void maybe_add_circle_event(auto* left, auto* middle, auto* right, auto sweep_y, auto& event_queue) {
+        const auto& p1 = left->site->point;
+        const auto& p2 = middle->site->point;
+        const auto& p3 = right->site->point;
+
+        auto convergence_point = compute_convergence_point(p1, p2, p3);
+
+        if (!convergence_point.has_value())
+            return;
+
+        auto r = util::distance(convergence_point.value(), p1);
+        auto event_y = convergence_point.value().y - r;
+
+        if (!util::lt(event_y, sweep_y))
+            return;
+
+        bool left_bp_moving_right = util::lt(p1.y, p2.y);
+        bool right_bp_moving_right = util::lt(p2.y, p3.y);
+        bool diverging = !left_bp_moving_right && right_bp_moving_right;
+        if (diverging)
+            return;
+
+        auto left_initial_x = left_bp_moving_right ? p1.x : p2.x;
+        auto right_initial_x = right_bp_moving_right ? p2.x : p3.x;
+
+        bool left_bp_moving_towards_cp =
+                (left_bp_moving_right && util::lt(left_initial_x, convergence_point.value().x)) ||
+                (!left_bp_moving_right && util::gt(left_initial_x, convergence_point.value().x));
+        bool right_bp_moving_towards_cp =
+                (right_bp_moving_right && util::lt(right_initial_x, convergence_point.value().x)) ||
+                (!right_bp_moving_right && util::gt(right_initial_x, convergence_point.value().x));
+
+        if (!left_bp_moving_towards_cp || !right_bp_moving_towards_cp)
+            return;
+
+        event_t new_event(event_y, convergence_point.value(), middle);
+        middle->is_event_valid = std::get<typename event_t::circle_data_t>(new_event.data).is_valid;
+
+        event_queue.push(std::move(new_event));
+    }
+
+    void invalidate_circle_event(auto* arc) {
+        if (arc->is_event_valid.expired())
+            return;
+
+        *arc->is_event_valid.lock() = false;
+        arc->is_event_valid.reset();
+    }
+
+    template<typename event_t>
+    void handle_site_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
+        auto site = std::get<typename event_t::site_data_t>(event.data);
+
+        auto arc_above = beach_line.arc_above(site->point, event.y);
+        invalidate_circle_event(arc_above);
+
+        auto middle_arc = beach_line.break_arc(arc_above, site);
+        auto left_arc = middle_arc->prev;
+        auto right_arc = middle_arc->next;
+
+        add_edge(left_arc, middle_arc, diagram);
+        middle_arc->right_half_edge = middle_arc->left_half_edge;
+        right_arc->left_half_edge = left_arc->right_half_edge;
+
+        if (!beach_line.is_nil(left_arc->prev))
+            maybe_add_circle_event<event_t>(left_arc->prev, left_arc, middle_arc, event.y, event_queue);
+        if (!beach_line.is_nil(right_arc->next))
+            maybe_add_circle_event<event_t>(middle_arc, right_arc, right_arc->next, event.y, event_queue);
+    }
+
+    void set_dest(auto* left, auto* right, auto* vertex) {
+        left->right_half_edge->orig = vertex;
+        right->left_half_edge->dest = vertex;
+    }
+
+    void set_orig(auto* left, auto* right, auto* vertex) {
+        left->right_half_edge->dest = vertex;
+        right->left_half_edge->orig = vertex;
+    }
+
+    void set_prev_half_edge(auto* prev, auto* next) {
+        prev->next = next;
+        next->prev = prev;
+    }
+
+    void remove_arc_and_update_diag(auto* arc, auto* vertex, auto& beach_line, auto& diagram) {
+        set_dest(arc->prev, arc, vertex);
+        set_dest(arc, arc->next, vertex);
+
+        arc->left_half_edge->next = arc->right_half_edge;
+        arc->right_half_edge->prev = arc->left_half_edge;
+
+        beach_line.remove(arc);
+
+        auto prev_half_edge = arc->prev->right_half_edge;
+        auto next_half_edge = arc->next->left_half_edge;
+
+        add_edge(arc->prev, arc->next, diagram);
+        set_orig(arc->prev, arc->next, vertex);
+        set_prev_half_edge(arc->prev->right_half_edge, prev_half_edge);
+        set_prev_half_edge(next_half_edge, arc->next->left_half_edge);
+
+        delete arc;
+    }
+
+    template<typename event_t>
+    void handle_circle_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
+        auto& data = std::get<typename event_t::circle_data_t>(event.data);
+        if (!*data.is_valid)
+            return;
+
+        auto vertex = diagram.create_vertex(data.convergence);
+
+        auto arc = data.arc;
+        auto left_arc = arc->prev;
+        auto right_arc = arc->next;
+
+        invalidate_circle_event(left_arc);
+        invalidate_circle_event(right_arc);
+
+        remove_arc_and_update_diag(arc, vertex, beach_line, diagram);
+
+        if (!beach_line.is_nil(left_arc->prev))
+            maybe_add_circle_event<event_t>(left_arc->prev, left_arc, right_arc, event.y, event_queue);
+        if (!beach_line.is_nil(right_arc->next))
+            maybe_add_circle_event<event_t>(left_arc, right_arc, right_arc->next, event.y, event_queue);
+    }
+
+    template<typename point_t>
+    void generate(const auto& lt, const auto& rb, diagram_t<point_t>& diagram, event_queue_t<diagram_t<point_t>>& event_queue) {
         assert (!event_queue.empty());
 
-        typedef event_t<point2d_t> event_t;
-
-        diagram_t<point2d_t> diagram;
-        diagram.vertices.reserve(2 * event_queue.size() - 2);
-        diagram.half_edges.reserve(3 * event_queue.size() - 4);
-
-        beachline_implementation_t<point2d_t> beachline = std::vector<beachline_item<point2d_t>>();
-        std::get<std::vector<beachline_item<point2d_t>>>(beachline).reserve(2 * event_queue.size() - 1);
-
+//        typedef event_t<point2d_t> event_t;
+//
+//        diagram_t<point2d_t> diagram;
+//        diagram.vertices.reserve(2 * event_queue.size() - 2);
+//        diagram.half_edges.reserve(3 * event_queue.size() - 4);
+//
+//        beachline_implementation_t<point2d_t> beachline = std::vector<beachline_item<point2d_t>>();
+//        std::get<std::vector<beachline_item<point2d_t>>>(beachline).reserve(2 * event_queue.size() - 1);
+            beach_line_t<diagram_t<point_t>> beach_line;
+//
         {
             auto first_site_event = event_queue.top();
             event_queue.pop();
-            first_insert_visitor<point2d_t> inserter{ first_site_event.event_point };
-            std::visit(inserter, beachline);
+            beach_line.set_root(std::get<0>(first_site_event.data));
         }
 
         while (!event_queue.empty()) {
@@ -53,13 +195,18 @@ namespace dvoronoi::fortune::_details {
             event_queue.pop();
 
             if (event.type == event_type::site) {
-                insert_arc(beachline, event.event_point,event_queue, diagram);
+                handle_site_event(event, beach_line, diagram, event_queue);
             } else {
-                remove_arc(beachline, event, event_queue, diagram);
+                handle_circle_event(event, beach_line, diagram, event_queue);
             }
         }
 
-        return diagram;
+        bool bound_success = bound(lt, rb, diagram, beach_line);
+    }
+
+    bool bound(const auto& lt, const auto& rb, auto& diag, auto& beach_line) {
+        bool success = true;
+        return success;
     }
 
 } // namespace dvoronoi::fortune::_details

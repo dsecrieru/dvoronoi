@@ -14,7 +14,7 @@
 
 constexpr float width = 3840;
 constexpr float height = 2160;
-constexpr std::size_t count = 1000000;
+constexpr std::size_t count = 100000;
 constexpr int runs = 5;
 
 void bench_jcv() {
@@ -35,7 +35,7 @@ void bench_jcv() {
         memset(&diagram, 0, sizeof(jcv_diagram));
 
         const auto start = std::chrono::steady_clock::now();
-        jcv_diagram_generate(count, (const jcv_point *) points, 0, 0, &diagram);
+        jcv_diagram_generate(count, (const jcv_point *) points, nullptr, 0, &diagram);
         const auto end = std::chrono::steady_clock::now();
 
         auto run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -62,15 +62,14 @@ void bench_mygal() {
         std::uniform_real_distribution<float> distrib;
 
         for (auto i = 0; i < count; ++i) {
-            //points.emplace_back( distrib(rng) * (width - 1.0), distrib(rng) * (height - 1.0) );
-            points.emplace_back( distrib(rng), distrib(rng));
+            points.emplace_back( distrib(rng) * (width - 1.0f), distrib(rng) * (height - 1.0f) );
         }
 
         const auto start = std::chrono::steady_clock::now();
         auto algorithm = mygal::FortuneAlgorithm<float>(points);
         algorithm.construct();
         algorithm.bound(mygal::Box<float>{-0.05, -0.05, 1.05, 1.05});
-        //auto diagram = algorithm.getDiagram();
+        auto diagram = algorithm.getDiagram();
         const auto end = std::chrono::steady_clock::now();
 
         auto run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
