@@ -12,6 +12,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ref_std_generator)
 
 add_library(dvoronoi INTERFACE
+        common/point.hpp
         common/util.hpp
         common/diagram.hpp
         fortune/algorithm.hpp

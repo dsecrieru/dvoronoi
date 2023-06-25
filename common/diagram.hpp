@@ -8,54 +8,62 @@
 #include <vector>
 #include <list>
 
+#include "dvoronoi/common/point.hpp"
+
 namespace dvoronoi {
 
-    template<typename point_t>
     struct face_t;
 
-    template<typename point_t>
     struct site_t {
-        point_t point{};
-        face_t<point_t>* face = nullptr;
+        _internal::point2_t point{};
+        face_t* face = nullptr;
+
+        explicit site_t(_internal::scalar_t x, _internal::scalar_t y) : point(x, y) {}
     };
 
-    template<typename point_t>
     struct vertex_t {
-        point_t point{};
+        _internal::point2_t point{};
     };
 
-    template<typename point_t>
     struct half_edge_t {
-        vertex_t<point_t>* orig = nullptr;
-        vertex_t<point_t>* dest = nullptr;
-        half_edge_t<point_t>* twin = nullptr;
-        face_t<point_t>* face;
+        vertex_t* orig = nullptr;
+        vertex_t* dest = nullptr;
+        half_edge_t* twin = nullptr;
+        face_t* face = nullptr;
 
-        half_edge_t<point_t>* prev = nullptr;
-        half_edge_t<point_t>* next = nullptr;
+        half_edge_t* prev = nullptr;
+        half_edge_t* next = nullptr;
     };
 
-    template<typename point_t>
     struct face_t {
-        site_t<point_t>* site = nullptr;
-        half_edge_t<point_t>* half_edge = nullptr;
+        site_t* site = nullptr;
+        half_edge_t* half_edge = nullptr;
     };
 
-    template<typename point_type>
+    template<typename out_point_t>
+    struct diag_traits {
+        typedef out_point_t point_t;
+        typedef _internal::scalar_t scalar_t;
+        typedef site_t site_t;
+        typedef face_t face_t;
+        typedef vertex_t vertex_t;
+        typedef half_edge_t half_edge_t;
+    };
+
+    template<typename diag_traits>
     struct diagram_t {
-        typedef point_type point_t;
-        typedef decltype(point_t::x) scalar_t;
-        typedef site_t<point_t> site_t;
-        typedef face_t<point_t> face_t;
-        typedef vertex_t<point_t> vertex_t;
-        typedef half_edge_t<point_t> half_edge_t;
+        typedef diag_traits::point_t point_t;
+        typedef diag_traits::site_t site_t;
+        typedef diag_traits::face_t face_t;
+        typedef diag_traits::vertex_t vertex_t;
+        typedef diag_traits::half_edge_t half_edge_t;
 
         std::vector<site_t> sites{};
         std::vector<face_t> faces{};
         std::list<vertex_t> vertices{};
         std::list<half_edge_t> half_edges{};
 
-        vertex_t* create_vertex(const point_t& point) {
+        vertex_t* create_vertex(const _internal::point2_t& point) {
             vertices.emplace_back(point);
             //vertices.back().it = std::prev(vertices.end());
             return &vertices.back();

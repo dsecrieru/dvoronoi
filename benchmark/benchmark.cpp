@@ -52,23 +52,25 @@ void bench_jcv() {
 }
 
 void bench_mygal() {
+    typedef double scalar_t;
+
     std::vector<std::chrono::milliseconds> durations;
 
     for (auto r = 0; r < runs; ++r) {
-        std::vector<mygal::Vector2<float>> points;
+        std::vector<mygal::Vector2<scalar_t>> points;
         points.reserve(count);
 
         std::mt19937 rng(r);
-        std::uniform_real_distribution<float> distrib;
+        std::uniform_real_distribution<scalar_t> distrib;
 
         for (auto i = 0; i < count; ++i) {
-            points.emplace_back( distrib(rng) * (width - 1.0f), distrib(rng) * (height - 1.0f) );
+            points.emplace_back( distrib(rng) * (width - 1.0), distrib(rng) * (height - 1.0) );
         }
 
         const auto start = std::chrono::steady_clock::now();
-        auto algorithm = mygal::FortuneAlgorithm<float>(points);
+        auto algorithm = mygal::FortuneAlgorithm<scalar_t>(points);
         algorithm.construct();
-        algorithm.bound(mygal::Box<float>{-0.05, -0.05, 1.05, 1.05});
+        algorithm.bound(mygal::Box<scalar_t>{-0.05, -0.05, 1.05, 1.05});
         auto diagram = algorithm.getDiagram();
         const auto end = std::chrono::steady_clock::now();
 

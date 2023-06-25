@@ -5,16 +5,6 @@
 #ifndef DVORONOI_BEACH_LINE_HPP
 #define DVORONOI_BEACH_LINE_HPP
 
-//#include <variant>
-//#include <vector>
-//#include <set>
-//#include <memory>
-//#include <optional>
-//#include <cassert>
-
-//#include "dvoronoi/common/util.hpp"
-//#include "dvoronoi/common/diagram.hpp"
-//#include "event_queue.hpp"
 #include "arc_tree.hpp"
 #include "arc.hpp"
 

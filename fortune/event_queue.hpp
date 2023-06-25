@@ -5,8 +5,6 @@
 #ifndef DVORONOI_EVENT_QUEUE_HPP
 #define DVORONOI_EVENT_QUEUE_HPP
 
-#include <variant>
-#include <deque>
 #include <queue>
 
 #include "dvoronoi/common/diagram.hpp"
@@ -21,52 +19,49 @@ namespace dvoronoi::fortune::_details {
         circle
     };
 
-    template<typename diag_t>
+    template<typename diag_traits>
     struct event_t {
-        typedef diag_t::point_t point_t;
-        typedef diag_t::scalar_t scalar_t;
-        typedef diag_t::site_t site_t;
-        typedef site_t* site_h;
-        typedef arc_t<diag_t> arc_t;
+        typedef _internal::point2_t point_t;
+        typedef diag_traits::scalar_t scalar_t;
+        typedef diag_traits::site_t* site_h;
+        //typedef site_t* site_h;
+        typedef arc_t<diag_traits> arc_t;
 
         event_type type;
 
-        scalar_t x;
-        scalar_t y;
+        scalar_t x{};
+        scalar_t y{};
 
-        typedef site_h site_data_t;
+        site_h site = nullptr;
 
-        struct circle_data_t {
-            std::shared_ptr<bool> is_valid;
-            point_t convergence;
-            arc_t* arc;
-
-            explicit circle_data_t(const point_t& cp, arc_t* arc)
-                : is_valid(new bool(true)), convergence(cp), arc(arc) {}
-        };
-        std::variant<site_data_t, circle_data_t> data;
+        std::shared_ptr<bool> is_valid;
+        point_t convergence{};
+        arc_t* arc = nullptr;
 
         explicit event_t(site_h site)
-            : type(event_type::site), x(site->point.x), y(site->point.y), data(site) {}
+            : type(event_type::site), x(site->point.x), y(site->point.y), site(site) {}
         explicit event_t(scalar_t y, const point_t& cp, arc_t* arc)
-            : type(event_type::circle), x(cp.x), y(y), data{ std::in_place_type<circle_data_t>, cp, arc } {}
+            : type(event_type::circle), x(cp.x), y(y), is_valid(new bool(true)), convergence(cp), arc(arc) {}
+
+        bool operator<(const event_t& o) const {
+            return y < o.y || (y == o.y && x < o.x);
+        }
     };
 
-    template<typename ev_t>
-    auto event_compare = [](const ev_t& e1, const ev_t& e2) {
-        constexpr auto eps = std::numeric_limits<decltype(ev_t::y)>::epsilon();
-        return e1.y < e2.y - eps || (std::fabs(e1.y - e2.y) < eps && e1.x < e2.x - eps);
-    };
-
-    template<typename T>
-    using event_queue_t = std::priority_queue<event_t<T>, std::vector<event_t<T>>, decltype(event_compare<event_t<T>>)>;
-
-    template<typename T>
-    auto create_event_queue(std::size_t size_hint) {
-        std::vector<event_t<T>> storage;
-        storage.reserve(size_hint);
-        return event_queue_t<T>(event_compare<event_t<T>>, std::move(storage));
-    }
+//    template<typename T>
+//    auto event_compare = [](const event_t<T>& e1, const event_t<T>& e2) {
+//        return e1.y < e2.y || (e1.y == e2.y && e1.x < e2.x);
+//    };
+//
+//    template<typename T>
+//    using event_queue_t = std::priority_queue<event_t<T>, std::vector<event_t<T>>, decltype(event_compare<T>)>;
+//
+//    template<typename T>
+//    auto create_event_queue(std::size_t size_hint) {
+//        std::vector<event_t<T>> storage;
+//        storage.reserve(size_hint + size_hint / 100);
+//        return event_queue_t<T>(event_compare<T>, std::move(storage));
+//    }
 
 } // namespace dvoronoi::fortune::_details
 

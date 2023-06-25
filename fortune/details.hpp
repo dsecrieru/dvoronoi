@@ -26,17 +26,16 @@ namespace dvoronoi::fortune::_details {
 
     template<typename point_t>
     auto compute_convergence_point(const point_t& p1, const point_t& p2, const point_t& p3) -> std::optional<point_t> {
-        auto v1 = util::ortho(util::diff(p1, p2));
-        auto v2 = util::ortho(util::diff(p2, p3));
-        auto delta = util::mult(0.5f, util::diff(p3, p1));
-        auto denom = util::determinant(v1, v2);
+        auto v1 = (p1 - p2).ortho();
+        auto v2 = (p2 - p3).ortho();
+        auto delta = (p3 - p1) * 0.5;
+        auto denom = v1.det(v2);
 
         if (util::is_zero(denom))
             return std::nullopt;
 
-        auto t = util::determinant(delta, v2) / denom;
-        auto center = util::add(util::mult(0.5f, util::add(p1, p2)),
-                                util::mult(t, v1));
+        auto t = delta.det(v2) / denom;
+        auto center = (p1 + p2) * 0.5 + v1 * t;
 
         return center;
     }
@@ -52,7 +51,7 @@ namespace dvoronoi::fortune::_details {
         if (!convergence_point.has_value())
             return;
 
-        auto r = util::distance(convergence_point.value(), p1);
+        auto r = convergence_point.value().dist(p1);
         auto event_y = convergence_point.value().y - r;
 
         if (!util::lt(event_y, sweep_y))
@@ -78,8 +77,7 @@ namespace dvoronoi::fortune::_details {
             return;
 
         event_t new_event(event_y, convergence_point.value(), middle);
-        middle->is_event_valid = std::get<typename event_t::circle_data_t>(new_event.data).is_valid;
-
+        middle->is_event_valid = new_event.is_valid;
         event_queue.push(std::move(new_event));
     }
 
@@ -93,12 +91,10 @@ namespace dvoronoi::fortune::_details {
 
     template<typename event_t>
     void handle_site_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
-        auto site = std::get<typename event_t::site_data_t>(event.data);
-
-        auto arc_above = beach_line.arc_above(site->point, event.y);
+        auto arc_above = beach_line.arc_above(event.site->point, event.y);
         invalidate_circle_event(arc_above);
 
-        auto middle_arc = beach_line.break_arc(arc_above, site);
+        auto middle_arc = beach_line.break_arc(arc_above, event.site);
         auto left_arc = middle_arc->prev;
         auto right_arc = middle_arc->next;
 
@@ -149,13 +145,12 @@ namespace dvoronoi::fortune::_details {
 
     template<typename event_t>
     void handle_circle_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
-        auto& data = std::get<typename event_t::circle_data_t>(event.data);
-        if (!*data.is_valid)
+        if (!*event.is_valid)
             return;
 
-        auto vertex = diagram.create_vertex(data.convergence);
+        auto vertex = diagram.create_vertex(event.convergence);
 
-        auto arc = data.arc;
+        auto arc = event.arc;
         auto left_arc = arc->prev;
         auto right_arc = arc->next;
 
@@ -170,8 +165,8 @@ namespace dvoronoi::fortune::_details {
             maybe_add_circle_event<event_t>(left_arc, right_arc, right_arc->next, event.y, event_queue);
     }
 
-    template<typename point_t>
-    void generate(const auto& lt, const auto& rb, diagram_t<point_t>& diagram, event_queue_t<diagram_t<point_t>>& event_queue) {
+    template<typename diag_traits>
+    void generate(const auto& lt, const auto& rb, auto& diagram, auto& event_queue) {
         assert (!event_queue.empty());
 
 //        typedef event_t<point2d_t> event_t;
@@ -182,15 +177,19 @@ namespace dvoronoi::fortune::_details {
 //
 //        beachline_implementation_t<point2d_t> beachline = std::vector<beachline_item<point2d_t>>();
 //        std::get<std::vector<beachline_item<point2d_t>>>(beachline).reserve(2 * event_queue.size() - 1);
-            beach_line_t<diagram_t<point_t>> beach_line;
+        beach_line_t<diag_traits> beach_line;
 //
         {
             auto first_site_event = event_queue.top();
             event_queue.pop();
-            beach_line.set_root(std::get<0>(first_site_event.data));
+            beach_line.set_root(first_site_event.site);
         }
 
+//        std::size_t max_events = 0;
         while (!event_queue.empty()) {
+//            if (event_queue.size() > max_events)
+//                max_events = event_queue.size();
+
             auto event = event_queue.top();
             event_queue.pop();
 
@@ -200,6 +199,8 @@ namespace dvoronoi::fortune::_details {
                 handle_circle_event(event, beach_line, diagram, event_queue);
             }
         }
+
+//        std::cout << "inserted events = " << max_events << std::endl;
 
         bool bound_success = bound(lt, rb, diagram, beach_line);
     }

@@ -50,7 +50,7 @@ void populate(std::vector<point_t>& sites, std::size_t sites_count) {
     }
 }
 
-sf::CircleShape get_shape(float r, float x, float y, const sf::Color fill) {
+sf::CircleShape get_shape(scalar_t r, scalar_t x, scalar_t y, const sf::Color fill) {
     sf::CircleShape circle(r);
     circle.setPosition({ x - r, y - r });
     circle.setFillColor(fill);
@@ -129,7 +129,7 @@ int main() {
 
 #ifdef MYGAL
         for (const auto&s : mygal_diagram.getSites())
-            window_mygal.draw(get_shape(2, static_cast<float>(s.point.x), static_cast<float>(s.point.y), sf::Color(146, 255, 206)));
+            window_mygal.draw(get_shape(2, static_cast<scalar_t>(s.point.x), static_cast<scalar_t>(s.point.y), sf::Color(146, 255, 206)));
 #endif
 
         for (const auto he : diagram.half_edges) {
@@ -137,8 +137,8 @@ int main() {
                 continue;
 
             std::array<sf::Vertex, 2> line = {
-                sf::Vertex(he.orig->point),
-                sf::Vertex(he.dest->point)
+                    sf::Vertex({ static_cast<scalar_t>(he.orig->point.x), static_cast<scalar_t>(he.orig->point.y) }),
+                    sf::Vertex({ static_cast<scalar_t>(he.dest->point.x), static_cast<scalar_t>(he.dest->point.y) })
             };
             window.draw(line.data(), 2, sf::Lines);
         }
@@ -149,8 +149,8 @@ int main() {
                 continue;
 
             std::array<sf::Vertex, 2> line = {
-                    sf::Vertex({ static_cast<float>(he.origin->point.x), static_cast<float>(he.origin->point.y) }),
-                    sf::Vertex({ static_cast<float>(he.destination->point.x), static_cast<float>(he.destination->point.y) })
+                    sf::Vertex({ static_cast<scalar_t>(he.origin->point.x), static_cast<scalar_t>(he.origin->point.y) }),
+                    sf::Vertex({ static_cast<scalar_t>(he.destination->point.x), static_cast<scalar_t>(he.destination->point.y) })
             };
             window_mygal.draw(line.data(), 2, sf::Lines);
         }
@@ -168,42 +168,42 @@ int main() {
 
         auto site = diagram.sites[index];
         auto face = site.face;
-        window.draw(get_shape(2, site.point.x, site.point.y, sf::Color::Red));
+        window.draw(get_shape(2, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
-        auto first_he = face->half_edge;
-        auto he = first_he;
-        bool missing_ends = false;
-        bool missing_he = false;
-        do {
-            if (!he->orig || !he->dest) {
-                missing_ends = true;
-                he = he->next;
-                continue;
-            }
-
-            std::array<sf::Vertex, 2> line = {
-                sf::Vertex(he->orig->point, sf::Color::Red),
-                sf::Vertex(he->dest->point, sf::Color::Red)
-            };
-            window.draw(line.data(), 2, sf::Lines);
-            he = he->next;
-            if (!he)
-                missing_he = true;
-        } while (he && he != first_he);
-
-        if (!info_printed.contains(index)) {
-            std::cout << index;
-            if (missing_ends)
-                std::cout << ", missing ends";
-            if (missing_he)
-                std::cout << ", missing he";
-            std::cout << std::endl;
-            info_printed.insert(index);
-
-            //if (index == 15 || index == 92 || index == 166 || index == 189 || index == 233)
-            if (index == 15/*53*/)
-                std::cout << std::endl;
-        }
+//        auto first_he = face->half_edge;
+//        auto he = first_he;
+//        bool missing_ends = false;
+//        bool missing_he = false;
+//        do {
+//            if (!he->orig || !he->dest) {
+//                missing_ends = true;
+//                he = he->next;
+//                continue;
+//            }
+//
+//            std::array<sf::Vertex, 2> line = {
+//                sf::Vertex(he->orig->point, sf::Color::Red),
+//                sf::Vertex(he->dest->point, sf::Color::Red)
+//            };
+//            window.draw(line.data(), 2, sf::Lines);
+//            he = he->next;
+//            if (!he)
+//                missing_he = true;
+//        } while (he && he != first_he);
+//
+//        if (!info_printed.contains(index)) {
+//            std::cout << index;
+//            if (missing_ends)
+//                std::cout << ", missing ends";
+//            if (missing_he)
+//                std::cout << ", missing he";
+//            std::cout << std::endl;
+//            info_printed.insert(index);
+//
+//            //if (index == 15 || index == 92 || index == 166 || index == 189 || index == 233)
+//            if (index == 15/*53*/)
+//                std::cout << std::endl;
+//        }
 
         window.display();
         window_mygal.display();
