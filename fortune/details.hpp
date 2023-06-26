@@ -77,22 +77,22 @@ namespace dvoronoi::fortune::_details {
             return;
 
         auto new_event = std::make_unique<event_t>(event_y, convergence_point.value(), middle);
-        middle->is_event_valid = new_event->is_valid;
+        middle->event = new_event.get();
         event_queue.push(std::move(new_event));
     }
 
-    void invalidate_circle_event(auto* arc) {
-        if (arc->is_event_valid.expired())
+    void invalidate_circle_event(auto* arc, auto& event_queue) {
+        if (!arc->event)
             return;
 
-        *arc->is_event_valid.lock() = false;
-        arc->is_event_valid.reset();
+        event_queue.remove(arc->event->index);
+        arc->event = nullptr;
     }
 
     template<typename event_t>
     void handle_site_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
         auto arc_above = beach_line.arc_above(event.site->point, event.y);
-        invalidate_circle_event(arc_above);
+        invalidate_circle_event(arc_above, event_queue);
 
         auto middle_arc = beach_line.break_arc(arc_above, event.site);
         auto left_arc = middle_arc->prev;
@@ -145,17 +145,14 @@ namespace dvoronoi::fortune::_details {
 
     template<typename event_t>
     void handle_circle_event(const event_t& event, auto& beach_line, auto& diagram, auto& event_queue) {
-        if (!*event.is_valid)
-            return;
-
         auto vertex = diagram.create_vertex(event.convergence);
 
         auto arc = event.arc;
         auto left_arc = arc->prev;
         auto right_arc = arc->next;
 
-        invalidate_circle_event(left_arc);
-        invalidate_circle_event(right_arc);
+        invalidate_circle_event(left_arc, event_queue);
+        invalidate_circle_event(right_arc, event_queue);
 
         remove_arc_and_update_diag(arc, vertex, beach_line, diagram);
 

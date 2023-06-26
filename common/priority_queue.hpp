@@ -12,8 +12,21 @@ namespace dvoronoi {
 
     template<typename T>
     class priority_queue_t {
+    private:
+        [[nodiscard]] int parent(std::size_t idx) const { return (idx + 1) / 2 - 1; }
+        [[nodiscard]] std::size_t left_child(std::size_t idx) const { return 2 * (idx + 1) - 1; }
+        [[nodiscard]] std::size_t right_child(std::size_t idx) const { return 2 * (idx + 1); }
+
+        void update(std::size_t idx) {
+            auto p = parent(idx);
+            if (p >= 0 && *_elements[p] < *_elements[idx])
+                sift_up(idx);
+            else
+                sift_down(idx);
+        }
+
     public:
-        bool empty() const { return _elements.empty(); }
+        [[nodiscard]] bool empty() const { return _elements.empty(); }
 
         void push(std::unique_ptr<T>&& elem) {
             elem->index = _elements.size();
@@ -36,11 +49,14 @@ namespace dvoronoi {
             return top;
         }
 
-    private:
-        [[nodiscard]] int get_parent(std::size_t idx) const { return (idx + 1) / 2 - 1; }
-        [[nodiscard]] std::size_t left_child(std::size_t idx) const { return 2 * (idx + 1) - 1; }
-        [[nodiscard]] std::size_t right_child(std::size_t idx) const { return 2 * (idx + 1); }
+        void remove(std::size_t idx) {
+            swap(idx, _elements.size() - 1);
+            _elements.pop_back();
+            if (idx < _elements.size())
+                update(idx);
+        }
 
+    private:
         void swap(std::size_t i, std::size_t j) {
             std::swap(_elements[i], _elements[j]);
             _elements[i]->index = i;
@@ -48,13 +64,13 @@ namespace dvoronoi {
         }
 
         void sift_up(std::size_t idx) {
-            int parent = get_parent(idx);
-            if (parent < 0)
+            int p = parent(idx);
+            if (p < 0)
                 return;
 
-            if (*_elements[parent] < *_elements[idx]) {
-                swap(idx, parent);
-                sift_up(parent);
+            if (*_elements[p] < *_elements[idx]) {
+                swap(idx, p);
+                sift_up(p);
             }
         }
 

@@ -30,14 +30,13 @@ namespace dvoronoi::fortune::_details {
 
         site_h site = nullptr;
 
-        std::shared_ptr<bool> is_valid;
         point_t convergence{};
         arc_t* arc = nullptr;
 
         explicit event_t(site_h site)
             : type(event_type::site), x(site->point.x), y(site->point.y), site(site) {}
         explicit event_t(scalar_t y, const point_t& cp, arc_t* arc)
-            : type(event_type::circle), x(cp.x), y(y), is_valid(new bool(true)), convergence(cp), arc(arc) {}
+            : type(event_type::circle), x(cp.x), y(y), convergence(cp), arc(arc) {}
 
         bool operator<(const event_t& o) const {
             return y < o.y || (y == o.y && x < o.x);
