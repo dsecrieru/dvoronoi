@@ -5,6 +5,7 @@
 #ifndef DVORONOI_BEACH_LINE_HPP
 #define DVORONOI_BEACH_LINE_HPP
 
+#include "dvoronoi/common/util.hpp"
 #include "arc_tree.hpp"
 #include "arc.hpp"
 

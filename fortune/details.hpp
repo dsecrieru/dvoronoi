@@ -76,8 +76,8 @@ namespace dvoronoi::fortune::_details {
         if (!left_bp_moving_towards_cp || !right_bp_moving_towards_cp)
             return;
 
-        event_t new_event(event_y, convergence_point.value(), middle);
-        middle->is_event_valid = new_event.is_valid;
+        auto new_event = std::make_unique<event_t>(event_y, convergence_point.value(), middle);
+        middle->is_event_valid = new_event->is_valid;
         event_queue.push(std::move(new_event));
     }
 
@@ -180,9 +180,8 @@ namespace dvoronoi::fortune::_details {
         beach_line_t<diag_traits> beach_line;
 //
         {
-            auto first_site_event = event_queue.top();
-            event_queue.pop();
-            beach_line.set_root(first_site_event.site);
+            auto first_site_event = event_queue.pop();
+            beach_line.set_root(first_site_event->site);
         }
 
 //        std::size_t max_events = 0;
@@ -190,13 +189,12 @@ namespace dvoronoi::fortune::_details {
 //            if (event_queue.size() > max_events)
 //                max_events = event_queue.size();
 
-            auto event = event_queue.top();
-            event_queue.pop();
+            auto event = event_queue.pop();
 
-            if (event.type == event_type::site) {
-                handle_site_event(event, beach_line, diagram, event_queue);
+            if (event->type == event_type::site) {
+                handle_site_event(*event, beach_line, diagram, event_queue);
             } else {
-                handle_circle_event(event, beach_line, diagram, event_queue);
+                handle_circle_event(*event, beach_line, diagram, event_queue);
             }
         }
 

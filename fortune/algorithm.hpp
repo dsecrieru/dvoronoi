@@ -9,6 +9,7 @@
 //#include <generator>
 
 #include "dvoronoi/common/diagram.hpp"
+#include "dvoronoi/common/priority_queue.hpp"
 #include "details.hpp"
 
 namespace dvoronoi::fortune {
@@ -22,7 +23,8 @@ auto generate(const std::vector<point_t>& sites, const point_t& lt, const point_
     diagram.faces.reserve(sites.size());
 
 //    auto event_queue = _details::create_event_queue<traits>(sites.size());
-    std::priority_queue<_details::event_t<traits>> event_queue;
+//    std::priority_queue<_details::event_t<traits>> event_queue;
+    priority_queue_t<_details::event_t<traits>> event_queue;
 
     for (const auto& site : sites) {
         diagram.sites.emplace_back(site.x, site.y);

@@ -15,7 +15,7 @@
 constexpr float width = 3840;
 constexpr float height = 2160;
 constexpr std::size_t count = 100000;
-constexpr int runs = 5;
+constexpr int runs = 100;
 
 void bench_jcv() {
     std::vector<std::chrono::milliseconds> durations;

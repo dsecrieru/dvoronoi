@@ -5,10 +5,6 @@
 #ifndef DVORONOI_EVENT_QUEUE_HPP
 #define DVORONOI_EVENT_QUEUE_HPP
 
-#include <queue>
-
-#include "dvoronoi/common/diagram.hpp"
-#include "dvoronoi/common/util.hpp"
 #include "dvoronoi/common/point.hpp"
 #include "arc.hpp"
 
@@ -24,13 +20,13 @@ namespace dvoronoi::fortune::_details {
         typedef _internal::point2_t point_t;
         typedef diag_traits::scalar_t scalar_t;
         typedef diag_traits::site_t* site_h;
-        //typedef site_t* site_h;
         typedef arc_t<diag_traits> arc_t;
 
         event_type type;
 
         scalar_t x{};
         scalar_t y{};
+        std::size_t index{};
 
         site_h site = nullptr;
 

@@ -15,11 +15,13 @@ add_library(dvoronoi INTERFACE
         common/point.hpp
         common/util.hpp
         common/diagram.hpp
+        common/priority_queue.hpp
         fortune/algorithm.hpp
         fortune/beach_line.hpp
         fortune/event_queue.hpp
         fortune/arc.hpp
-        fortune/arc_tree.hpp)
+        fortune/arc_tree.hpp
+)
 
 target_include_directories(dvoronoi INTERFACE ${stdgenerator_SOURCE_DIR}/include ..)
 target_include_directories(dvoronoi INTERFACE ..)
