@@ -45,7 +45,6 @@ void bench(std::size_t sites_count) {
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(runs);
     std::cout << std::format("generated in ~{:3}\n", avg_duration);
-    //std::cout << "generated in ~" << std::chrono::duration_cast<std::chrono::nanoseconds>(avg_duration).count() << std::endl;
 }
 
 int main() {

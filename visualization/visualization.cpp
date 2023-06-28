@@ -14,14 +14,14 @@ using namespace std::chrono_literals;
 
 #include <dvoronoi/fortune/algorithm.hpp>
 
-#define MYGAL
+//#define MYGAL
 #ifdef MYGAL
 #include <MyGAL/FortuneAlgorithm.h>
 #endif
 
 const int width = 1280;
 const int height = 1024;
-const std::size_t SITES_COUNT = 5000;
+const std::size_t SITES_COUNT = 2500;
 
 typedef float scalar_t;
 typedef sf::Vector2f point_t;
@@ -78,11 +78,17 @@ int main() {
     std::size_t index = 0;
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
+#ifdef MYGAL
     sf::RenderWindow window_mygal(sf::VideoMode(width, height), "mygal");
+#endif
 
     std::unordered_set<std::size_t> info_printed;
 
+#ifdef MYGAL
     while (window.isOpen() || window_mygal.isOpen()) {
+#else
+    while (window.isOpen()) {
+#endif
         sf::Event event{};
         while (window.pollEvent(event)) {
             switch (event.type) {
@@ -103,6 +109,7 @@ int main() {
         }
 //        ++index;
 
+#ifdef MYGAL
         while (window_mygal.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
@@ -120,9 +127,12 @@ int main() {
                     break;
             }
         }
+#endif
 
         window.clear(sf::Color(100, 100, 100));
+#ifdef MYGAL
         window_mygal.clear(sf::Color(100, 100, 100));
+#endif
 
         for (const auto& p : sites)
             window.draw(get_shape(2, p.x, p.y, sf::Color(146, 255, 206)));
@@ -206,7 +216,9 @@ int main() {
 //        }
 
         window.display();
+#ifdef MYGAL
         window_mygal.display();
+#endif
 
         std::this_thread::sleep_for(10ms);
     }

@@ -5,7 +5,7 @@
 #ifndef DVORONOI_ARC_HPP
 #define DVORONOI_ARC_HPP
 
-#include "event_queue.hpp"
+#include "event.hpp"
 
 namespace dvoronoi::fortune::_details {
 

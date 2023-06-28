@@ -26,6 +26,12 @@ namespace dvoronoi {
         }
 
     public:
+        priority_queue_t() {}
+        explicit priority_queue_t(std::size_t reserve_size) {
+            _elements.reserve(reserve_size);
+        }
+
+    public:
         [[nodiscard]] bool empty() const { return _elements.empty(); }
 
         void push(std::unique_ptr<T>&& elem) {

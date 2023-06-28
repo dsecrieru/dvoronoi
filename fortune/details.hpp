@@ -5,12 +5,9 @@
 #ifndef DVORONOI_DETAILS_HPP
 #define DVORONOI_DETAILS_HPP
 
-#include <variant>
-#include <deque>
-#include <queue>
 #include <cassert>
 
-#include "event_queue.hpp"
+#include "event.hpp"
 #include "beach_line.hpp"
 
 namespace dvoronoi::fortune::_details {
@@ -167,25 +164,18 @@ namespace dvoronoi::fortune::_details {
         assert (!event_queue.empty());
 
 //        typedef event_t<point2d_t> event_t;
-//
 //        diagram_t<point2d_t> diagram;
 //        diagram.vertices.reserve(2 * event_queue.size() - 2);
 //        diagram.half_edges.reserve(3 * event_queue.size() - 4);
 //
-//        beachline_implementation_t<point2d_t> beachline = std::vector<beachline_item<point2d_t>>();
-//        std::get<std::vector<beachline_item<point2d_t>>>(beachline).reserve(2 * event_queue.size() - 1);
         beach_line_t<diag_traits> beach_line;
-//
+
         {
             auto first_site_event = event_queue.pop();
             beach_line.set_root(first_site_event->site);
         }
 
-//        std::size_t max_events = 0;
         while (!event_queue.empty()) {
-//            if (event_queue.size() > max_events)
-//                max_events = event_queue.size();
-
             auto event = event_queue.pop();
 
             if (event->type == event_type::site) {
@@ -194,8 +184,6 @@ namespace dvoronoi::fortune::_details {
                 handle_circle_event(*event, beach_line, diagram, event_queue);
             }
         }
-
-//        std::cout << "inserted events = " << max_events << std::endl;
 
         bool bound_success = bound(lt, rb, diagram, beach_line);
     }

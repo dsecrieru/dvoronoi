@@ -18,7 +18,7 @@ add_library(dvoronoi INTERFACE
         common/priority_queue.hpp
         fortune/algorithm.hpp
         fortune/beach_line.hpp
-        fortune/event_queue.hpp
+        fortune/event.hpp
         fortune/arc.hpp
         fortune/arc_tree.hpp
 )

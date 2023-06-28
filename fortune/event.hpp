@@ -2,8 +2,8 @@
 // Created by Daniel Secrieru on 18/05/2023.
 //
 
-#ifndef DVORONOI_EVENT_QUEUE_HPP
-#define DVORONOI_EVENT_QUEUE_HPP
+#ifndef DVORONOI_EVENT_HPP
+#define DVORONOI_EVENT_HPP
 
 #include "dvoronoi/common/point.hpp"
 #include "arc.hpp"
@@ -38,26 +38,16 @@ namespace dvoronoi::fortune::_details {
         explicit event_t(scalar_t y, const point_t& cp, arc_t* arc)
             : type(event_type::circle), x(cp.x), y(y), convergence(cp), arc(arc) {}
 
-        bool operator<(const event_t& o) const {
-            return y < o.y || (y == o.y && x < o.x);
-        }
+//        bool operator<(const event_t& o) const {
+//            return y < o.y || (y == o.y && x < o.x);
+//        }
     };
 
-//    template<typename T>
-//    auto event_compare = [](const event_t<T>& e1, const event_t<T>& e2) {
-//        return e1.y < e2.y || (e1.y == e2.y && e1.x < e2.x);
-//    };
-//
-//    template<typename T>
-//    using event_queue_t = std::priority_queue<event_t<T>, std::vector<event_t<T>>, decltype(event_compare<T>)>;
-//
-//    template<typename T>
-//    auto create_event_queue(std::size_t size_hint) {
-//        std::vector<event_t<T>> storage;
-//        storage.reserve(size_hint + size_hint / 100);
-//        return event_queue_t<T>(event_compare<T>, std::move(storage));
-//    }
+    template<typename T>
+    bool operator<(const event_t<T>& lhs, const event_t<T>& rhs) {
+        return lhs.y < rhs.y || (lhs.y == rhs.y && lhs.x < rhs.x);
+    }
 
 } // namespace dvoronoi::fortune::_details
 
-#endif //DVORONOI_EVENT_QUEUE_HPP
+#endif //DVORONOI_EVENT_HPP

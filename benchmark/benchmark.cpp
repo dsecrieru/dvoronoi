@@ -70,7 +70,7 @@ void bench_mygal() {
         const auto start = std::chrono::steady_clock::now();
         auto algorithm = mygal::FortuneAlgorithm<scalar_t>(points);
         algorithm.construct();
-        algorithm.bound(mygal::Box<scalar_t>{-0.05, -0.05, 1.05, 1.05});
+//        algorithm.bound(mygal::Box<scalar_t>{-0.05, -0.05, 1.05, 1.05});
         auto diagram = algorithm.getDiagram();
         const auto end = std::chrono::steady_clock::now();
 

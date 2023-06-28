@@ -22,9 +22,7 @@ auto generate(const std::vector<point_t>& sites, const point_t& lt, const point_
     diagram.sites.reserve(sites.size());
     diagram.faces.reserve(sites.size());
 
-//    auto event_queue = _details::create_event_queue<traits>(sites.size());
-//    std::priority_queue<_details::event_t<traits>> event_queue;
-    priority_queue_t<_details::event_t<traits>> event_queue;
+    priority_queue_t<_details::event_t<traits>> event_queue(sites.size() + sites.size() / 100);
 
     for (const auto& site : sites) {
         diagram.sites.emplace_back(site.x, site.y);
