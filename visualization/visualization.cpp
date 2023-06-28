@@ -180,26 +180,26 @@ int main() {
         auto face = site.face;
         window.draw(get_shape(2, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
-//        auto first_he = face->half_edge;
-//        auto he = first_he;
-//        bool missing_ends = false;
-//        bool missing_he = false;
-//        do {
-//            if (!he->orig || !he->dest) {
-//                missing_ends = true;
-//                he = he->next;
-//                continue;
-//            }
-//
-//            std::array<sf::Vertex, 2> line = {
-//                sf::Vertex(he->orig->point, sf::Color::Red),
-//                sf::Vertex(he->dest->point, sf::Color::Red)
-//            };
-//            window.draw(line.data(), 2, sf::Lines);
-//            he = he->next;
-//            if (!he)
-//                missing_he = true;
-//        } while (he && he != first_he);
+        auto first_he = face->half_edge;
+        auto he = first_he;
+        bool missing_ends = false;
+        bool missing_he = false;
+        do {
+            if (!he->orig || !he->dest) {
+                missing_ends = true;
+                he = he->next;
+                continue;
+            }
+
+            std::array<sf::Vertex, 2> line = {
+                sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
+                sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
+            };
+            window.draw(line.data(), 2, sf::Lines);
+            he = he->next;
+            if (!he)
+                missing_he = true;
+        } while (he && he != first_he);
 //
 //        if (!info_printed.contains(index)) {
 //            std::cout << index;
