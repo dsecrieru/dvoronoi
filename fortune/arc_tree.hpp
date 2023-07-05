@@ -14,6 +14,13 @@ namespace dvoronoi::fortune::_details {
         arc_t* _root;
 
         void free(arc_t* arc) {
+            if (is_nil(arc))
+                return;
+
+            free(arc->left);
+            free(arc->right);
+
+            delete arc;
         }
 
         arc_tree_t() : _nil(new arc_t), _root(_nil) {}

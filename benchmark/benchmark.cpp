@@ -48,7 +48,7 @@ void bench_jcv() {
     }
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(runs);
-    std::cout << std::format("[jcv]\tgenerated in ~{:3}\n", avg_duration);
+    std::cout << std::format("[jcv]\tavg: {:3}\n", avg_duration);
 }
 
 void bench_mygal() {
@@ -81,7 +81,7 @@ void bench_mygal() {
     }
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(runs);
-    std::cout << std::format("[mygal]\tgenerated in ~{:3}\n", avg_duration);
+    std::cout << std::format("[mygal]\tavg: {:3}\n", avg_duration);
 }
 
 int main() {
