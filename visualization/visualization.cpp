@@ -21,31 +21,34 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
-const std::size_t SITES_COUNT = 2500;
+const std::size_t SITES_COUNT = 100;
 
 typedef float scalar_t;
 typedef sf::Vector2f point_t;
+#ifdef MYGAL
 typedef double mygal_t;
+using mygal_point_t = mygal::Vector2<mygal_t>;
+#endif
 
 #ifdef MYGAL
-void populate(std::vector<point_t>& sites, std::vector<mygal::Vector2<mygal_t>>& mygal_sites, std::size_t sites_count) {
+void populate(std::vector<point_t>& sites, std::vector<mygal_point_t>& mygal_sites, std::vector<sf::Vector2f>& move_vec, std::size_t sites_count) {
 #else
-void populate(std::vector<point_t>& sites, std::size_t sites_count) {
+void populate(std::vector<point_t>& sites, std::vector<sf::Vector2f>& move_vec, std::size_t sites_count) {
 #endif
     std::random_device rd;
     std::mt19937 rng(0/*rd()*/);
     std::uniform_real_distribution<scalar_t> distrib;
 
     sites.reserve(sites_count);
+    move_vec.reserve(sites_count);
 #ifdef MYGAL
     mygal_sites.reserve(sites_count);
 #endif
     for(auto i = 0; i < sites_count; ++i) {
-        auto x = distrib(rng) * (width - 1.0f);
-        auto y = distrib(rng) * (height - 1.0f);
-        sites.emplace_back(x, y);
+        sites.emplace_back(distrib(rng) * (width - 1.0f), distrib(rng) * (height - 1.0f));
+        move_vec.emplace_back(distrib(rng) * 2.0f - 1.0f, distrib(rng) * 2.0f - 1.0f);
 #ifdef MYGAL
-        mygal_sites.emplace_back(x, y);
+        mygal_sites.emplace_back(sites.back().x, sites.back().y);
 #endif
     }
 }
@@ -60,19 +63,12 @@ sf::CircleShape get_shape(scalar_t r, scalar_t x, scalar_t y, const sf::Color fi
 int main() {
 
     std::vector<point_t> sites;
+    std::vector<point_t> move_vec;
 #ifdef MYGAL
-    std::vector<mygal::Vector2<mygal_t>> mygal_sites;
-    populate(sites, mygal_sites, SITES_COUNT);
+    std::vector<mygal_point_t> mygal_sites;
+    populate(sites, mygal_sites, move_vec, SITES_COUNT);
 #else
-    populate(sites, SITES_COUNT);
-#endif
-
-    auto diagram = dvoronoi::fortune::generate(sites, { 0, 0 }, { scalar_t(width), scalar_t(height) });
-
-#ifdef MYGAL
-    auto algorithm = mygal::FortuneAlgorithm<mygal_t>(mygal_sites);
-    algorithm.construct();
-    auto mygal_diagram = algorithm.getDiagram();
+    populate(sites, move_vec, SITES_COUNT);
 #endif
 
     std::size_t index = 0;
@@ -132,6 +128,15 @@ int main() {
         window.clear(sf::Color(100, 100, 100));
 #ifdef MYGAL
         window_mygal.clear(sf::Color(100, 100, 100));
+#endif
+
+        auto diagram = dvoronoi::fortune::generate(sites, { 0, 0 }, { scalar_t(width), scalar_t(height) });
+
+#ifdef MYGAL
+        auto algorithm = mygal::FortuneAlgorithm<mygal_t>(mygal_sites);
+        algorithm.construct();
+        algorithm.bound(mygal::Box<mygal_t>{ 0.0, height - 1.0, width - 1.0, 0.0 });
+        auto mygal_diagram = algorithm.getDiagram();
 #endif
 
         for (const auto& p : sites)
@@ -216,6 +221,31 @@ int main() {
 //        }
 
         window.display();
+
+        for (auto i = 0; i < sites.size(); ++i) {
+            sites[i] += move_vec[i];
+#ifdef MYGAL
+            mygal_sites[i].x += move_vec[i].x;
+            mygal_sites[i].y += move_vec[i].y;
+#endif
+
+            if (sites[i].x < 0 || sites[i].x > width) {
+                sites[i].x = std::clamp(sites[i].x, 0.0f, width - 1.0f);
+#ifdef MYGAL
+                mygal_sites[i].x = std::clamp(mygal_sites[i].x, 0.0, width - 1.0);
+#endif
+                move_vec[i].x = -move_vec[i].x;
+            }
+
+            if (sites[i].y < 0 || sites[i].y > height) {
+                sites[i].y = std::clamp(sites[i].y, 0.0f, height - 1.0f);
+#ifdef MYGAL
+                mygal_sites[i].y = std::clamp(mygal_sites[i].y, 0.0, height - 1.0);
+#endif
+                move_vec[i].y = -move_vec[i].y;
+            }
+        }
+
 #ifdef MYGAL
         window_mygal.display();
 #endif
