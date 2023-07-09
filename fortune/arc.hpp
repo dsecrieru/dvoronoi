@@ -33,6 +33,21 @@ namespace dvoronoi::fortune::_details {
         color_t color = color_t::Black;
         side_t side = side_t::Left;
     };
+
+    void set_dest(auto* left, auto* right, auto* vertex) {
+        left->right_half_edge->orig = vertex;
+        right->left_half_edge->dest = vertex;
+    }
+
+    void set_orig(auto* left, auto* right, auto* vertex) {
+        left->right_half_edge->dest = vertex;
+        right->left_half_edge->orig = vertex;
+    }
+
+    void set_prev_half_edge(auto* prev, auto* next) {
+        prev->next = next;
+        next->prev = prev;
+    }
 }
 
 #endif //DVORONOI_ARC_HPP

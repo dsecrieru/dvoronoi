@@ -9,6 +9,13 @@
 
 #include "event.hpp"
 #include "beach_line.hpp"
+#include "bound.hpp"
+
+namespace dvoronoi::fortune {
+    struct config_t {
+        bool do_bound = true;
+    };
+}
 
 namespace dvoronoi::fortune::_details {
 
@@ -105,21 +112,6 @@ namespace dvoronoi::fortune::_details {
             maybe_add_circle_event<event_t>(middle_arc, right_arc, right_arc->next, event.y, event_queue);
     }
 
-    void set_dest(auto* left, auto* right, auto* vertex) {
-        left->right_half_edge->orig = vertex;
-        right->left_half_edge->dest = vertex;
-    }
-
-    void set_orig(auto* left, auto* right, auto* vertex) {
-        left->right_half_edge->dest = vertex;
-        right->left_half_edge->orig = vertex;
-    }
-
-    void set_prev_half_edge(auto* prev, auto* next) {
-        prev->next = next;
-        next->prev = prev;
-    }
-
     void remove_arc_and_update_diag(auto* arc, auto* vertex, auto& beach_line, auto& diagram) {
         set_dest(arc->prev, arc, vertex);
         set_dest(arc, arc->next, vertex);
@@ -160,7 +152,7 @@ namespace dvoronoi::fortune::_details {
     }
 
     template<typename diag_traits>
-    void generate(const auto& lt, const auto& rb, auto& diagram, auto& event_queue) {
+    void generate(const config_t& config, auto& diagram, auto& event_queue) {
         assert (!event_queue.empty());
 
 //        typedef event_t<point2d_t> event_t;
@@ -185,12 +177,9 @@ namespace dvoronoi::fortune::_details {
             }
         }
 
-        bool bound_success = bound(lt, rb, diagram, beach_line);
-    }
-
-    bool bound(const auto& lt, const auto& rb, auto& diag, auto& beach_line) {
-        bool success = true;
-        return success;
+        if (config.do_bound) {
+            bool all_bounded = bound(diagram, beach_line);
+        }
     }
 
 } // namespace dvoronoi::fortune::_details

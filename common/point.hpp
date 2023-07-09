@@ -20,7 +20,7 @@ namespace dvoronoi::_internal {
 
         point2_t& operator+=(const point2_t& p) { x += p.x; y += p.y; return *this; }
         point2_t& operator-=(const point2_t& p) { x -= p.x; y -= p.y; return *this; }
-        point2_t& operator*(const scalar_t s) { x *= s; y *= s; return *this; }
+        point2_t& operator*=(const scalar_t s) { x *= s; y *= s; return *this; }
 
         [[nodiscard]] scalar_t norm() const { return std::sqrt(x * x + y * y); };
         [[nodiscard]] point2_t ortho() const { return { -y, x }; }
@@ -37,6 +37,15 @@ namespace dvoronoi::_internal {
         lhs -= rhs;
         return lhs;
     }
+
+    template<typename T>
+    point2_t operator*(T scalar, point2_t p) {
+        p *= scalar;
+        return p;
+    }
+
+    template<typename T>
+    point2_t operator*(point2_t p, T scalar) { return scalar * p; }
 }
 
 #endif //DVORONOI_POINT_HPP

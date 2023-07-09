@@ -28,6 +28,7 @@ namespace dvoronoi::fortune::_details {
         beach_line_t(const beach_line_t&&) = delete;
         beach_line_t& operator=(const beach_line_t&) = delete;
 
+        [[nodiscard]] bool empty() const { return is_nil(this->_root); }
         bool is_nil(const arc_t* arc) const { return arc_tree_t<arc_t>::is_nil(arc); }
 
         void set_root(site_t* site) {
@@ -39,6 +40,13 @@ namespace dvoronoi::fortune::_details {
         auto break_arc(arc_t* arc, site_t* site);
 
         void remove(arc_t* arc) { arc_tree_t<arc_t>::remove(arc); }
+
+        arc_t* leftmost_arc() const {
+            auto x = this->_root;
+            while (!is_nil(x->prev))
+                x = x->prev;
+            return x;
+        }
 
     private:
         void replace(arc_t* arc, arc_t* other) { arc_tree_t<arc_t>::replace(arc, other); }

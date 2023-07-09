@@ -12,13 +12,30 @@
 
 namespace dvoronoi {
 
+    namespace _internal {
+        namespace box_side {
+            constexpr std::size_t Left = 0;
+            constexpr std::size_t Bottom = 1;
+            constexpr std::size_t Right = 2;
+            constexpr std::size_t Top = 3;
+        }
+
+        struct box_t {
+            _internal::scalar_t left = -std::numeric_limits<_internal::scalar_t>::infinity();
+            _internal::scalar_t bottom = std::numeric_limits<_internal::scalar_t>::infinity();
+            _internal::scalar_t right = std::numeric_limits<_internal::scalar_t>::infinity();
+            _internal::scalar_t top = - std::numeric_limits<_internal::scalar_t>::infinity();
+        };
+    }
+
     struct face_t;
 
     struct site_t {
+        std::size_t index;
         _internal::point2_t point{};
         face_t* face = nullptr;
 
-        explicit site_t(_internal::scalar_t x, _internal::scalar_t y) : point(x, y) {}
+        explicit site_t(std::size_t i, _internal::scalar_t x, _internal::scalar_t y) : index(i), point(x, y) {}
     };
 
     struct vertex_t {
@@ -76,6 +93,21 @@ namespace dvoronoi {
             if (face->half_edge == nullptr)
                 face->half_edge = &half_edges.back();
             return &half_edges.back();
+        }
+
+        vertex_t* create_corner(const _internal::box_t& box, std::size_t side) {
+            switch (side) {
+                case _internal::box_side::Left:
+                    return create_vertex({ box.left, box.top });
+                case _internal::box_side::Bottom:
+                    return create_vertex({ box.left, box.bottom });
+                case _internal::box_side::Right:
+                    return create_vertex({ box.right, box.bottom });
+                case _internal::box_side::Top:
+                    return create_vertex({ box.right, box.top });
+                default:
+                    return nullptr;
+            }
         }
     };
 

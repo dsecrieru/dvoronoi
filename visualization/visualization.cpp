@@ -21,7 +21,7 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
-const std::size_t SITES_COUNT = 100;
+const std::size_t SITES_COUNT = 2500;
 
 typedef float scalar_t;
 typedef sf::Vector2f point_t;
@@ -130,12 +130,12 @@ int main() {
         window_mygal.clear(sf::Color(100, 100, 100));
 #endif
 
-        auto diagram = dvoronoi::fortune::generate(sites, { 0, 0 }, { scalar_t(width), scalar_t(height) });
+        auto diagram = dvoronoi::fortune::generate(sites, {});
 
 #ifdef MYGAL
         auto algorithm = mygal::FortuneAlgorithm<mygal_t>(mygal_sites);
         algorithm.construct();
-        algorithm.bound(mygal::Box<mygal_t>{ 0.0, height - 1.0, width - 1.0, 0.0 });
+        algorithm.bound(mygal::Box<mygal_t>{ 0.0, height, width, 0.0 });
         auto mygal_diagram = algorithm.getDiagram();
 #endif
 

@@ -21,7 +21,7 @@ add_library(dvoronoi INTERFACE
         fortune/event.hpp
         fortune/arc.hpp
         fortune/arc_tree.hpp
-)
+        fortune/bound.hpp)
 
 target_include_directories(dvoronoi INTERFACE ${stdgenerator_SOURCE_DIR}/include ..)
 target_include_directories(dvoronoi INTERFACE ..)

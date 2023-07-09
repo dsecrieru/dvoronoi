@@ -34,7 +34,7 @@ void bench(std::size_t sites_count) {
         }
 
         const auto start = std::chrono::steady_clock::now();
-        auto diagram = dvoronoi::fortune::generate(sites, { 0, 0 }, { width, height });
+        auto diagram = dvoronoi::fortune::generate(sites, {});
         const auto end = std::chrono::steady_clock::now();
 
         auto run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -43,7 +43,7 @@ void bench(std::size_t sites_count) {
         std::cout << "finished run " << r << " in " << run_duration << std::endl;
     }
 
-    const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(runs);
+    const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(durations.size());
     std::cout << std::format("avg: {:3}\n", avg_duration);
 }
 
