@@ -56,7 +56,7 @@ namespace dvoronoi::fortune::_details {
         half_edge_t* next_half_edge = nullptr;
     };
 
-    typedef std::vector<linked_vertex_t> linked_vertices_t;
+    typedef std::list<linked_vertex_t> linked_vertices_t;
     typedef std::unordered_map<std::size_t, std::array<linked_vertex_t*, 8>> vertices_t;
 
     bool bound(auto& diag, auto& beach_line) {
