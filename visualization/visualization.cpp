@@ -23,6 +23,12 @@ const int width = 1280;
 const int height = 1024;
 const std::size_t SITES_COUNT = 2500;
 
+const uint8_t bg_comp = 65;
+const sf::Color bg_col(bg_comp, bg_comp, bg_comp);
+const sf::Color site_col(244, 108, 63);
+const sf::Color edge_col(46, 149, 153);
+//const sf::Color triang_col(247, 220, 104);
+
 typedef float scalar_t;
 typedef sf::Vector2f point_t;
 #ifdef MYGAL
@@ -125,9 +131,9 @@ int main() {
         }
 #endif
 
-        window.clear(sf::Color(100, 100, 100));
+        window.clear(bg_col);
 #ifdef MYGAL
-        window_mygal.clear(sf::Color(100, 100, 100));
+        window_mygal.clear(bg_col);
 #endif
 
         auto diagram = dvoronoi::fortune::generate(sites, {});
@@ -140,11 +146,11 @@ int main() {
 #endif
 
         for (const auto& p : sites)
-            window.draw(get_shape(2, p.x, p.y, sf::Color(146, 255, 206)));
+            window.draw(get_shape(2, p.x, p.y, site_col));
 
 #ifdef MYGAL
         for (const auto&s : mygal_diagram.getSites())
-            window_mygal.draw(get_shape(2, static_cast<scalar_t>(s.point.x), static_cast<scalar_t>(s.point.y), sf::Color(146, 255, 206)));
+            window_mygal.draw(get_shape(2, static_cast<scalar_t>(s.point.x), static_cast<scalar_t>(s.point.y), site_col));
 #endif
 
         for (const auto he : diagram.half_edges) {
@@ -152,8 +158,8 @@ int main() {
                 continue;
 
             std::array<sf::Vertex, 2> line = {
-                    sf::Vertex({ static_cast<scalar_t>(he.orig->point.x), static_cast<scalar_t>(he.orig->point.y) }),
-                    sf::Vertex({ static_cast<scalar_t>(he.dest->point.x), static_cast<scalar_t>(he.dest->point.y) })
+                    sf::Vertex({ static_cast<scalar_t>(he.orig->point.x), static_cast<scalar_t>(he.orig->point.y) }, edge_col),
+                    sf::Vertex({ static_cast<scalar_t>(he.dest->point.x), static_cast<scalar_t>(he.dest->point.y) }, edge_col )
             };
             window.draw(line.data(), 2, sf::Lines);
         }
@@ -164,8 +170,8 @@ int main() {
                 continue;
 
             std::array<sf::Vertex, 2> line = {
-                    sf::Vertex({ static_cast<scalar_t>(he.origin->point.x), static_cast<scalar_t>(he.origin->point.y) }),
-                    sf::Vertex({ static_cast<scalar_t>(he.destination->point.x), static_cast<scalar_t>(he.destination->point.y) })
+                    sf::Vertex({ static_cast<scalar_t>(he.origin->point.x), static_cast<scalar_t>(he.origin->point.y) }, edge_col),
+                    sf::Vertex({ static_cast<scalar_t>(he.destination->point.x), static_cast<scalar_t>(he.destination->point.y) }, edge_col)
             };
             window_mygal.draw(line.data(), 2, sf::Lines);
         }
