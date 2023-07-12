@@ -42,7 +42,7 @@ namespace dvoronoi {
 
         template<class... Args>
         void emplace(Args&&... args) {
-            auto& elem = _elements.emplace_back(std::make_unique<T>(args...));
+            const auto& elem = _elements.emplace_back(std::make_unique<T>(args...));
             elem->index = _elements.size() - 1;
             sift_up(_elements.size() - 1);
         }

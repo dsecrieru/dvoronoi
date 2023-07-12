@@ -3,13 +3,13 @@ project(dvoronoi)
 
 set(CMAKE_CXX_STANDARD 20)
 
-include(FetchContent)
-FetchContent_Declare(
-        ref_std_generator
-        GIT_REPOSITORY https://github.com/lewissbaker/generator.git
-        GIT_TAG origin/main
-)
-FetchContent_MakeAvailable(ref_std_generator)
+#include(FetchContent)
+#FetchContent_Declare(
+#        ref_std_generator
+#        GIT_REPOSITORY https://github.com/lewissbaker/generator.git
+#        GIT_TAG origin/main
+#)
+#FetchContent_MakeAvailable(ref_std_generator)
 
 add_library(dvoronoi INTERFACE
         common/point.hpp

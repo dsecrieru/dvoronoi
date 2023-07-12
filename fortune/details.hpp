@@ -178,7 +178,7 @@ namespace dvoronoi::fortune::_details {
         }
 
         if (config.do_bound) {
-            bool all_bounded = bound(diagram, beach_line);
+            bound(diagram, beach_line);
         }
     }
 

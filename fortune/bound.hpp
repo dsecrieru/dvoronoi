@@ -147,7 +147,7 @@ namespace dvoronoi::fortune::_details {
         return success;
     }
 
-    void join_half_edges(std::size_t i, std::array<linked_vertex_t*, 8>& cell_vertices, auto& diag) {
+    void join_half_edges(std::size_t i, const std::array<linked_vertex_t*, 8>& cell_vertices, auto& diag) {
         for (std::size_t side = 0; side < 4; ++side) {
             if (cell_vertices[2 * side] == nullptr)
                 continue;
