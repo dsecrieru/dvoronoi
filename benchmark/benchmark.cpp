@@ -55,7 +55,7 @@ void bench_jcv() {
     }
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(durations.size());
-    std::cout << std::format("[jcv]\tavg: {:3}\n", avg_duration);
+    std::cout << "[jcv]      avg: " << std::setw(3) << avg_duration << std::endl;
 }
 
 auto bench_mygal(std::size_t run) {
@@ -114,14 +114,14 @@ int main() {
         dvoronoi_durations.push_back(dvoronoi);
 
         std::cout
-            << std::format("[mygal]\tfinished run {:3}", r) << " in " << mygal << "\t"
+            << "[mygal]\tfinished run " << std::setw(3) << r << " in " << mygal << "\t"
             << "[dvoronoi] in " << dvoronoi
             << std::endl;
     }
 
     const auto avg_mygal_duration = std::reduce(mygal_durations.begin(), mygal_durations.end()) / float(mygal_durations.size());
-    std::cout << std::format("[mygal]\tavg: {:3}\n", avg_mygal_duration);
+    std::cout << "[mygal]    avg: " << std::setw(3) << avg_mygal_duration << std::endl;
 
     const auto avg_dvoronoi_duration = std::reduce(dvoronoi_durations.begin(), dvoronoi_durations.end()) / float(dvoronoi_durations.size());
-    std::cout << std::format("[dvoronoi]\tavg: {:3}\n", avg_dvoronoi_duration);
+    std::cout << "[dvoronoi] avg: " << std::setw(3) << avg_dvoronoi_duration << std::endl;
 }

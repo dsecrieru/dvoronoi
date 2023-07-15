@@ -28,43 +28,45 @@ namespace dvoronoi {
         };
     }
 
-    struct face_t;
+    namespace data {
+        struct face_t;
 
-    struct site_t {
-        std::size_t index;
-        _internal::point2_t point{};
-        face_t* face = nullptr;
+        struct site_t {
+            std::size_t index;
+            _internal::point2_t point{};
+            face_t* face = nullptr;
 
-        explicit site_t(std::size_t i, _internal::scalar_t x, _internal::scalar_t y) : index(i), point(x, y) {}
-    };
+            explicit site_t(std::size_t i, _internal::scalar_t x, _internal::scalar_t y) : index(i), point(x, y) {}
+        };
 
-    struct vertex_t {
-        _internal::point2_t point{};
-    };
+        struct vertex_t {
+            _internal::point2_t point{};
+        };
 
-    struct half_edge_t {
-        vertex_t* orig = nullptr;
-        vertex_t* dest = nullptr;
-        half_edge_t* twin = nullptr;
-        face_t* face = nullptr;
+        struct half_edge_t {
+            vertex_t* orig = nullptr;
+            vertex_t* dest = nullptr;
+            half_edge_t* twin = nullptr;
+            face_t* face = nullptr;
 
-        half_edge_t* prev = nullptr;
-        half_edge_t* next = nullptr;
-    };
+            half_edge_t* prev = nullptr;
+            half_edge_t* next = nullptr;
+        };
 
-    struct face_t {
-        site_t* site = nullptr;
-        half_edge_t* half_edge = nullptr;
-    };
+        struct face_t {
+            site_t* site = nullptr;
+            half_edge_t* half_edge = nullptr;
+        };
+    } // namespace data
 
     template<typename out_point_t>
     struct diag_traits {
         typedef out_point_t point_t;
         typedef _internal::scalar_t scalar_t;
-        typedef site_t site_t;
-        typedef face_t face_t;
-        typedef vertex_t vertex_t;
-        typedef half_edge_t half_edge_t;
+        typedef data::site_t site_t;
+        typedef data::face_t face_t;
+        typedef data::vertex_t vertex_t;
+        typedef data::half_edge_t half_edge_t;
     };
 
     template<typename diag_traits>
