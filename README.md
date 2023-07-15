@@ -3,7 +3,7 @@ Currently, *dvoronoi* implements Fortune's algorithm for generating Voronoi diag
 
 ![dvoronoi example](./images/dvoronoi_20230712_01.png)
 
-It is a header-only, C++20 implementation, so far, built and tested on:
+It's a header-only, C++20 implementation, built and tested on:
 - Windows 10, VS 2017, compiler version 19.36.32532
 
 I might implement more features in the far/near future, like:
@@ -21,7 +21,7 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
 | `benchmark`     | benchmark and comparison between various other implementations                                             |
 | `common`        | common stuff, some internal, some not, unrelated to a specific algorithm                                   |
 | `random`        | simple example and test bench, using randomly generated points                                             |
-| `fortune`       | contains the user api (`algorithm.hpp`) entry point, as well as Fortune's algorithm implementation details |
+| `fortune`       | contains the user api `algorithm.hpp` entry point, as well as Fortune's algorithm implementation details |
 | `visualization` | SFML based visualization                                                                                   |
  
 # Performance
