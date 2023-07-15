@@ -51,9 +51,9 @@ namespace dvoronoi::fortune::_details {
     }
 
     struct linked_vertex_t {
-        half_edge_t* prev_half_edge = nullptr;
-        vertex_t* vertex = nullptr;
-        half_edge_t* next_half_edge = nullptr;
+        dvoronoi::data::half_edge_t* prev_half_edge = nullptr;
+        dvoronoi::data::vertex_t* vertex = nullptr;
+        dvoronoi::data::half_edge_t* next_half_edge = nullptr;
     };
 
     typedef std::list<linked_vertex_t> linked_vertices_t;

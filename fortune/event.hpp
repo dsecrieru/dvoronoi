@@ -20,7 +20,7 @@ namespace dvoronoi::fortune::_details {
         typedef _internal::point2_t point_t;
         typedef diag_traits::scalar_t scalar_t;
         typedef diag_traits::site_t* site_h;
-        typedef arc_t<diag_traits> arc_t;
+        typedef data::arc_t<diag_traits> arc_t;
 
         event_type type;
 

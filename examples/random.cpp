@@ -44,7 +44,7 @@ void bench(std::size_t sites_count) {
     }
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(durations.size());
-    std::cout << std::format("avg: {:3}\n", avg_duration);
+    std::cout << "avg: " << std::setw(3) <<  avg_duration << std::endl;
 }
 
 int main() {

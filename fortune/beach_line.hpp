@@ -12,9 +12,9 @@
 namespace dvoronoi::fortune::_details {
 
     template<typename diag_t>
-    class beach_line_t : private arc_tree_t<arc_t<diag_t>> {
+    class beach_line_t : private arc_tree_t<data::arc_t<diag_t>> {
     public:
-        typedef arc_t<diag_t> arc_t;
+        typedef data::arc_t<diag_t> arc_t;
         typedef diag_t::scalar_t scalar_t;
         typedef diag_t::site_t site_t;
 

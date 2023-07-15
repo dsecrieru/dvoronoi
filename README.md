@@ -5,6 +5,7 @@ Currently, *dvoronoi* implements Fortune's algorithm for generating Voronoi diag
 
 It's a header-only, C++20 implementation, built and tested on:
 - Windows 10, VS 2017, compiler version 19.36.32532
+- WSL Ubuntu 23.04, GCC 13.0.1
 
 I might implement more features in the far/near future, like:
 - Delaunay triangulation
