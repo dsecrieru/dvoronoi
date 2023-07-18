@@ -8,7 +8,8 @@
 #include <vector>
 #include <list>
 
-#include "dvoronoi/common/point.hpp"
+#include "point.hpp"
+#include "tracing_resource.hpp"
 
 namespace dvoronoi {
 
@@ -70,17 +71,34 @@ namespace dvoronoi {
     };
 
     template<typename diag_traits>
-    struct diagram_t {
+    class diagram_t {
+    public:
         typedef diag_traits::point_t point_t;
         typedef diag_traits::site_t site_t;
         typedef diag_traits::face_t face_t;
         typedef diag_traits::vertex_t vertex_t;
         typedef diag_traits::half_edge_t half_edge_t;
 
+    private:
+        //memory_management::tracing_resource _tracing_res{std::cout};
+        //std::pmr::unsynchronized_pool_resource _res{&_tracing_res};
+        // std::unique_ptr<std::byte[]> _vert_buf;
+        std::pmr::unsynchronized_pool_resource _vert_res{};
+        std::unique_ptr<std::byte[]> _he_buf;
+        std::pmr::monotonic_buffer_resource _he_res;
+
+    public:
         std::vector<site_t> sites{};
         std::vector<face_t> faces{};
-        std::list<vertex_t> vertices{};
-        std::list<half_edge_t> half_edges{};
+        std::pmr::list<vertex_t> vertices{&_vert_res}; // requires pointer stability
+        std::pmr::list<half_edge_t> half_edges; // requires pointer stability, stored in arc
+
+        explicit diagram_t(std::size_t n)
+            // : _vert_buf(new std::byte[2 * n * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], 2 * n * sizeof(vertex_t)), vertices(&_vert_res)
+            : _he_buf(new std::byte[3 * n * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 3 * n * sizeof(half_edge_t)), half_edges(&_he_res) {
+            sites.reserve(n);
+            faces.reserve(n);
+        }
 
         vertex_t* create_vertex(const _internal::point2_t& point) {
             vertices.emplace_back(point);

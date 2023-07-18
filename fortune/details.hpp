@@ -155,11 +155,6 @@ namespace dvoronoi::fortune::_details {
     void generate(const config_t& config, auto& diagram, auto& event_queue) {
         assert (!event_queue.empty());
 
-//        typedef event_t<point2d_t> event_t;
-//        diagram_t<point2d_t> diagram;
-//        diagram.vertices.reserve(2 * event_queue.size() - 2);
-//        diagram.half_edges.reserve(3 * event_queue.size() - 4);
-//
         beach_line_t<diag_traits> beach_line;
 
         {
@@ -167,19 +162,44 @@ namespace dvoronoi::fortune::_details {
             beach_line.set_root(first_site_event->site);
         }
 
+#ifdef MEM_PROFILING
+        int circle_events = 0;
+        std::size_t max_events = 0;
+#endif
         while (!event_queue.empty()) {
+#ifdef MEM_PROFILING
+            max_events = std::max(max_events, event_queue.size());
+#endif
             auto event = event_queue.pop();
 
             if (event->type == event_type::site) {
                 handle_site_event(*event, beach_line, diagram, event_queue);
             } else {
                 handle_circle_event(*event, beach_line, diagram, event_queue);
+#ifdef MEM_PROFILING
+                ++circle_events;
+#endif                
             }
         }
 
         if (config.do_bound) {
             bound(diagram, beach_line);
         }
+
+#ifdef MEM_PROFILING
+        std::cout << "------------------------" << std::endl;
+
+        std::cout << "max events:    " << std::setw(10) << max_events << std::endl;
+
+        int circle_events_diff = (2 * diagram.sites.size() - 4) - circle_events;
+        std::cout << "circle events: " << std::setw(10) << circle_events << "\t" << circle_events_diff << std::endl;
+
+        int vertices_diff = (2 * diagram.sites.size() - 4) - diagram.vertices.size();
+        std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << "\t" << vertices_diff << std::endl;
+
+        int he_diff = 2 * (3 * diagram.sites.size() - 6) - diagram.half_edges.size();
+        std::cout << "half edges:    " << std::setw(10) << diagram.half_edges.size() << "\t" << he_diff << std::endl;
+#endif
     }
 
 } // namespace dvoronoi::fortune::_details

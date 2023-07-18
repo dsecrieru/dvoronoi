@@ -16,6 +16,7 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
+const float edge = 100;
 const std::size_t SITES_COUNT = 2500;
 
 const uint8_t bg_comp = 65;
@@ -35,7 +36,7 @@ void populate(std::vector<point_t>& sites, std::vector<sf::Vector2f>& move_vec, 
     sites.reserve(sites_count);
     move_vec.reserve(sites_count);
     for(auto i = 0; i < sites_count; ++i) {
-        sites.emplace_back(distrib(rng) * (width - 1.0f), distrib(rng) * (height - 1.0f));
+        sites.emplace_back(edge + distrib(rng) * (width - 2 * edge), edge + distrib(rng) * (height - 2 * edge));
         move_vec.emplace_back(distrib(rng) * 2.0f - 1.0f, distrib(rng) * 2.0f - 1.0f);
     }
 }
@@ -52,8 +53,11 @@ int main() {
     std::vector<point_t> move_vec;
     populate(sites, move_vec, SITES_COUNT);
 
+    auto diagram = dvoronoi::fortune::generate(sites, {});
+
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
 
+    bool is_paused = true;
     std::size_t index = 0;
 
     while (window.isOpen()) {
@@ -69,6 +73,8 @@ int main() {
                         window.close();
                     if (event.key.code == sf::Keyboard::N)
                         ++index;
+                    if (event.key.code == sf::Keyboard::Space)
+                        is_paused = !is_paused;
                     break;
 
                 default:
@@ -78,12 +84,10 @@ int main() {
 
         window.clear(bg_col);
 
-        auto diagram = dvoronoi::fortune::generate(sites, {});
-
         for (const auto& p : sites)
             window.draw(get_shape(2, p.x, p.y, site_col));
 
-        for (const auto he : diagram.half_edges) {
+        for (const auto he : diagram->half_edges) {
             if (!he.orig || !he.dest)
                 continue;
 
@@ -94,55 +98,55 @@ int main() {
             window.draw(line.data(), 2, sf::Lines);
         }
 
-//        for (const auto v: diagram.vertices) {
-//            window.draw(get_shape(1, v.point, sf::Color(255, 50, 50)));
-//        }
-
-        if (index > diagram.sites.size() - 1) {
+        if (index > diagram->sites.size() - 1) {
             window.display();
             std::this_thread::sleep_for(10ms);
             continue;
         }
 
-        auto site = diagram.sites[index];
+        auto site = diagram->sites[index];
         auto face = site.face;
         window.draw(get_shape(2, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
-        auto first_he = face->half_edge;
-        auto he = first_he;
-        bool missing_ends = false;
-        bool missing_he = false;
-        do {
-            if (!he->orig || !he->dest) {
-                missing_ends = true;
-                he = he->next;
-                continue;
-            }
+        // auto first_he = face->half_edge;
+        // auto he = first_he;
+        // bool missing_ends = false;
+        // bool missing_he = false;
+        // do {
+        //     if (!he->orig || !he->dest) {
+        //         missing_ends = true;
+        //         he = he->next;
+        //         continue;
+        //     }
 
-            std::array<sf::Vertex, 2> line = {
-                sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
-                sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
-            };
-            window.draw(line.data(), 2, sf::Lines);
-            he = he->next;
-            if (!he)
-                missing_he = true;
-        } while (he && he != first_he);
+        //     std::array<sf::Vertex, 2> line = {
+        //         sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
+        //         sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
+        //     };
+        //     window.draw(line.data(), 2, sf::Lines);
+        //     he = he->next;
+        //     if (!he)
+        //         missing_he = true;
+        // } while (he && he != first_he);
 
         window.display();
 
-        for (auto i = 0; i < sites.size(); ++i) {
-            sites[i] += move_vec[i];
+        if (!is_paused) {
+            for (auto i = 0; i < sites.size(); ++i) {
+                sites[i] += move_vec[i];
 
-            if (sites[i].x < 0 || sites[i].x > width) {
-                sites[i].x = std::clamp(sites[i].x, 0.0f, width - 1.0f);
-                move_vec[i].x = -move_vec[i].x;
+                if (sites[i].x < edge || sites[i].x > width - edge) {
+                    sites[i].x = std::clamp(sites[i].x, edge, width - edge);
+                    move_vec[i].x = -move_vec[i].x;
+                }
+
+                if (sites[i].y < edge || sites[i].y > height - edge) {
+                    sites[i].y = std::clamp(sites[i].y, edge, height - edge);
+                    move_vec[i].y = -move_vec[i].y;
+                }
             }
 
-            if (sites[i].y < 0 || sites[i].y > height) {
-                sites[i].y = std::clamp(sites[i].y, 0.0f, height - 1.0f);
-                move_vec[i].y = -move_vec[i].y;
-            }
+            diagram = dvoronoi::fortune::generate(sites, {});
         }
 
         std::this_thread::sleep_for(10ms);

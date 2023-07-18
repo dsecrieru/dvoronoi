@@ -33,6 +33,7 @@ namespace dvoronoi {
 
     public:
         [[nodiscard]] bool empty() const { return _elements.empty(); }
+        [[nodiscard]] std::size_t size() const { return _elements.size(); }
 
         void push(std::unique_ptr<T>&& elem) {
             elem->index = _elements.size();

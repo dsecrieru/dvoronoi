@@ -3,12 +3,15 @@
 #include <numeric>
 #include <iostream>
 
+//#define MEM_PROFILING
+
 #include <dvoronoi/fortune/algorithm.hpp>
 
 typedef double scalar_t;
 constexpr scalar_t width = 3840;
 constexpr scalar_t height = 2160;
 constexpr std::size_t runs = 100;
+constexpr std::size_t count = 100000;
 
 template<typename T>
 struct gen_point2d_t {
@@ -26,7 +29,7 @@ void bench(std::size_t sites_count) {
 
         //std::random_device rd;
         //std::mt19937 rng(rd());
-        std::mt19937 rng(r);
+        std::mt19937 rng(0);
         std::uniform_real_distribution<scalar_t> distrib;
 
         for(auto i = 0; i < sites_count; ++i) {
@@ -48,5 +51,5 @@ void bench(std::size_t sites_count) {
 }
 
 int main() {
-    bench(100000);
+    bench(count);
 }
