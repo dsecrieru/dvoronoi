@@ -81,21 +81,29 @@ namespace dvoronoi {
 
     private:
         //memory_management::tracing_resource _tracing_res{std::cout};
+        // std::pmr::monotonic_buffer_resource _res;
+        // std::pmr::unsynchronized_pool_resource _pool;
         //std::pmr::unsynchronized_pool_resource _res{&_tracing_res};
-        // std::unique_ptr<std::byte[]> _vert_buf;
-        std::pmr::unsynchronized_pool_resource _vert_res{};
+        std::unique_ptr<std::byte[]> _vert_buf;
+        std::pmr::monotonic_buffer_resource _vert_res;//std::pmr::unsynchronized_pool_resource _vert_res{};
+        //std::pmr::unsynchronized_pool_resource _vert_pool;
         std::unique_ptr<std::byte[]> _he_buf;
         std::pmr::monotonic_buffer_resource _he_res;
+        //std::pmr::unsynchronized_pool_resource _he_res{};
 
     public:
         std::vector<site_t> sites{};
         std::vector<face_t> faces{};
-        std::pmr::list<vertex_t> vertices{&_vert_res}; // requires pointer stability
+        //std::pmr::list<vertex_t> vertices{&_vert_res}; // requires pointer stability
+        std::pmr::list<vertex_t> vertices; // requires pointer stability
+        //std::pmr::list<half_edge_t> half_edges{&_he_res}; // requires pointer stability, stored in arc
         std::pmr::list<half_edge_t> half_edges; // requires pointer stability, stored in arc
 
         explicit diagram_t(std::size_t n)
-            // : _vert_buf(new std::byte[2 * n * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], 2 * n * sizeof(vertex_t)), vertices(&_vert_res)
-            : _he_buf(new std::byte[3 * n * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 3 * n * sizeof(half_edge_t)), half_edges(&_he_res) {
+            : _vert_buf(new std::byte[2 * n * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], 2 * n * sizeof(vertex_t)/*, &_tracing_res*/), vertices(&_vert_res)
+            //: _vert_res(3 * n * sizeof(vertex_t) + 5 * sizeof(vertex_t), &_tracing_res), vertices(&_vert_res)
+            , _he_buf(new std::byte[3 * n * sizeof(half_edge_t) + (n / 5) * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 3 * n * sizeof(half_edge_t) + (n / 5) * sizeof(half_edge_t)/*, &_tracing_res*/), half_edges(&_he_res)
+        {
             sites.reserve(n);
             faces.reserve(n);
         }

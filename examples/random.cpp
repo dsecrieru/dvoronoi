@@ -29,7 +29,7 @@ void bench(std::size_t sites_count) {
 
         //std::random_device rd;
         //std::mt19937 rng(rd());
-        std::mt19937 rng(0);
+        std::mt19937 rng(r);
         std::uniform_real_distribution<scalar_t> distrib;
 
         for(auto i = 0; i < sites_count; ++i) {
