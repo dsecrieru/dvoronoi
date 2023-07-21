@@ -10,6 +10,17 @@ namespace dvoronoi::fortune::_details {
     template<typename arc_t>
     class arc_tree_t {
     protected:
+//#define USE_PMR
+#ifdef USE_PMR
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+        //memory_management::tracing_resource _tracing_res{"beach_line"};
+        std::pmr::monotonic_buffer_resource _res{/*&_tracing_res*/};
+        std::pmr::unsynchronized_pool_resource _pool{&_res};
+        allocator_type _allocator{&_pool};
+        // std::size_t allocations;
+        // std::size_t max_allocations;
+#endif
+
         arc_t* _nil;
         arc_t* _root;
 
@@ -20,10 +31,30 @@ namespace dvoronoi::fortune::_details {
             free(arc->left);
             free(arc->right);
 
-            delete arc;
+            delete_arc(arc);
         }
 
-        arc_tree_t() : _nil(new arc_t), _root(_nil) {}
+        template<typename... Args>
+        arc_t* new_arc(Args&&... args) {
+            // ++this->allocations;
+            // this->max_allocations = std::max(this->allocations, this->max_allocations);
+#ifdef USE_PMR
+            return _allocator.new_object<arc_t>(std::forward<Args>(args)...);
+#else
+            return new arc_t { std::forward<Args>(args)... };
+#endif
+        }
+        
+        void delete_arc(arc_t* arc) {
+#ifdef USE_PMR
+            _allocator.delete_object(arc);
+#else
+            delete arc;
+#endif
+            // --allocations;
+        }
+
+        arc_tree_t() : /*allocations(1), max_allocations(1), */_nil(new_arc()), _root(_nil) {}
 
         bool is_nil(const arc_t* arc) const { return arc == _nil; }
 

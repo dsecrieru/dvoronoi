@@ -129,7 +129,7 @@ namespace dvoronoi::fortune::_details {
         set_prev_half_edge(arc->prev->right_half_edge, prev_half_edge);
         set_prev_half_edge(next_half_edge, arc->next->left_half_edge);
 
-        delete arc;
+        beach_line.delete_arc(arc);
     }
 
     template<typename event_t>

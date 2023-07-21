@@ -21,7 +21,8 @@ namespace dvoronoi::fortune::_details {
         beach_line_t() : arc_tree_t<arc_t>() {}
         ~beach_line_t() {
             arc_tree_t<arc_t>::free(this->_root);
-            delete this->_nil;
+            arc_tree_t<arc_t>::delete_arc(this->_nil);
+            // std::cout << "[bl::dtor]: " << this->allocations << ", max: " << this->max_allocations << std::endl;;
         }
 
         beach_line_t(const beach_line_t&) = delete;
@@ -40,6 +41,7 @@ namespace dvoronoi::fortune::_details {
         auto break_arc(arc_t* arc, site_t* site);
 
         void remove(arc_t* arc) { arc_tree_t<arc_t>::remove(arc); }
+        void delete_arc(arc_t* arc) { arc_tree_t<arc_t>::delete_arc(arc); }
 
         arc_t* leftmost_arc() const {
             auto x = this->_root;
@@ -54,7 +56,7 @@ namespace dvoronoi::fortune::_details {
         void insert_after(arc_t* after, arc_t* arc) { arc_tree_t<arc_t>::insert_after(after, arc); }
 
         arc_t* create_arc(site_t* site, typename arc_t::side_t side) {
-            return new arc_t{ this->_nil, this->_nil, this->_nil, this->_nil, this->_nil, site, nullptr, nullptr, {}, arc_t::color_t::Red, side };
+            return arc_tree_t<arc_t>::new_arc(this->_nil, this->_nil, this->_nil, this->_nil, this->_nil, site, nullptr, nullptr, nullptr, arc_t::color_t::Red, side);
         }
 
         auto compute_breakpoint(const auto& p1, const auto& p2, auto sweep_y, typename arc_t::side_t side) const;
@@ -99,7 +101,7 @@ namespace dvoronoi::fortune::_details {
         insert_before(middle_arc, left_arc);
         insert_after(middle_arc, right_arc);
 
-        delete arc;
+        arc_tree_t<arc_t>::delete_arc(arc);
 
         return middle_arc;
     }

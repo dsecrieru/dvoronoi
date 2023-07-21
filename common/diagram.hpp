@@ -80,22 +80,32 @@ namespace dvoronoi {
         typedef diag_traits::half_edge_t half_edge_t;
 
     private:
-        //memory_management::tracing_resource _tracing_vert{"vert", std::cout, std::pmr::null_memory_resource()};
+#define USE_PMR
+#ifdef USE_PMR
+        //memory_management::tracing_resource _tracing_vert{"vert", std::pmr::null_memory_resource()};
         std::unique_ptr<std::byte[]> _vert_buf;
         std::pmr::monotonic_buffer_resource _vert_res;
-        //memory_management::tracing_resource _tracing_he{"he  ", std::cout, std::pmr::null_memory_resource()};
+        //memory_management::tracing_resource _tracing_he{"he  ", std::pmr::null_memory_resource()};
         std::unique_ptr<std::byte[]> _he_buf;
         std::pmr::monotonic_buffer_resource _he_res;
+#endif
 
     public:
         std::vector<site_t> sites{};
         std::vector<face_t> faces{};
+#ifdef USE_PMR
         std::pmr::vector<vertex_t> vertices{&_vert_res}; // requires pointer stability, so no re-allocation allowed
         std::pmr::vector<half_edge_t> half_edges{&_he_res}; // requires pointer stability, so no re-allocation allowed
+#else
+        std::vector<vertex_t> vertices{}; // requires pointer stability, so no re-allocation allowed
+        std::vector<half_edge_t> half_edges{}; // requires pointer stability, so no re-allocation allowed
+#endif
 
         explicit diagram_t(std::size_t n)
+#ifdef USE_PMR
             : _vert_buf(new std::byte[(2 * n + 10) * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], (2 * n + 10) * sizeof(vertex_t), std::pmr::null_memory_resource()/*&_tracing_vert*/)
             , _he_buf(new std::byte[6 * n * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 6 * n * sizeof(half_edge_t), std::pmr::null_memory_resource()/*&_tracing_he*/)
+#endif
         {
             sites.reserve(n);
             faces.reserve(n);
