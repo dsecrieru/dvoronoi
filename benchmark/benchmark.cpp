@@ -124,4 +124,7 @@ int main() {
 
     const auto avg_dvoronoi_duration = std::reduce(dvoronoi_durations.begin(), dvoronoi_durations.end()) / float(dvoronoi_durations.size());
     std::cout << "[dvoronoi] avg: " << std::setw(3) << avg_dvoronoi_duration << std::endl;
+
+    const auto relative = 100.0 * (avg_mygal_duration - avg_dvoronoi_duration) / avg_mygal_duration;
+    std::cout << relative << '%' << std::endl;
 }
