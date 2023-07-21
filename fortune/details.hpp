@@ -157,6 +157,17 @@ namespace dvoronoi::fortune::_details {
 
         beach_line_t<diag_traits> beach_line;
 
+#ifdef MEM_PROFILING
+    auto event_sz = sizeof(_details::event_t<diag_traits>);
+    auto vertex_sz = sizeof(typename diag_traits::vertex_t);
+    auto he_sz = sizeof(typename diag_traits::half_edge_t);
+    auto arc_sz = sizeof(typename beach_line_t<diag_traits>::arc_t);
+    std::cout << "event sz:  " << event_sz << std::endl;
+    std::cout << "arc sz:    " << arc_sz << std::endl;
+    std::cout << "vertex sz: " << vertex_sz << std::endl;
+    std::cout << "he sz:     " << he_sz << std::endl;
+#endif
+
         {
             auto first_site_event = event_queue.pop();
             beach_line.set_root(first_site_event->site);
@@ -186,6 +197,9 @@ namespace dvoronoi::fortune::_details {
             bound(diagram, beach_line);
         }
 
+        // std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << std::endl;
+        // std::cout << "half edges:    " << std::setw(10) << diagram.half_edges.size() << std::endl;
+
 #ifdef MEM_PROFILING
         std::cout << "------------------------" << std::endl;
 
@@ -193,12 +207,6 @@ namespace dvoronoi::fortune::_details {
 
         int circle_events_diff = (2 * diagram.sites.size() - 4) - circle_events;
         std::cout << "circle events: " << std::setw(10) << circle_events << "\t" << circle_events_diff << std::endl;
-
-        int vertices_diff = (2 * diagram.sites.size() - 4) - diagram.vertices.size();
-        std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << "\t" << vertices_diff << std::endl;
-
-        int he_diff = 2 * (3 * diagram.sites.size() - 6) - diagram.half_edges.size();
-        std::cout << "half edges:    " << std::setw(10) << diagram.half_edges.size() << "\t" << he_diff << std::endl;
 #endif
     }
 

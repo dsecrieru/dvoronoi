@@ -114,8 +114,8 @@ int main() {
         dvoronoi_durations.push_back(dvoronoi);
 
         std::cout
-            << "[mygal]\tfinished run " << std::setw(3) << r << " in " << mygal << "\t"
-            << "[dvoronoi] in " << dvoronoi
+            << "finished run " << std::setw(3) << r << " in "
+            << "[mygal] " << mygal << "\t" << "[dvoronoi] " << dvoronoi
             << std::endl;
     }
 

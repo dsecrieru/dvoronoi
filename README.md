@@ -10,6 +10,7 @@ It's a header-only, C++20 implementation, built and tested on:
 I might implement more features in the far/near future, like:
 - Delaunay triangulation
 - generator-based approach, with incremental algorithm for Delaunay/Voronoi
+- allocator awareness
 
 ## Motivation
 I wanted to try using Voronoi diagrams in a different project and decided to try my hand at my own implementation, as I thought it's a good opportunity to learn more about algorithms and data structures, new C++ standards, performance profiling and so on.

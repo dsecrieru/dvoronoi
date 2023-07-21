@@ -19,24 +19,6 @@ auto generate(const std::vector<point_t>& sites, const config_t& config = config
     typedef diag_traits<point_t> traits;
     typedef diagram_t<traits> diag_t;
     auto diagram = std::make_unique<diag_t>(sites.size());
-
-#ifdef MEM_PROFILING
-    auto event_sz = sizeof(_details::event_t<traits>);
-    auto vertex_sz = sizeof(typename traits::vertex_t);
-    auto he_sz = sizeof(typename traits::half_edge_t);
-    std::cout << "event sz: " << event_sz << std::endl;
-    std::cout << "vertex sz: " << vertex_sz << std::endl;
-    std::cout << "he sz: " << he_sz << std::endl;
-#endif
-
-    // std::cout << "allocating\n";
-    // // char queue_buff[event_sz * 3 * sites.size()] = {};
-    // auto queue_buff = new char[event_sz * 3 * sites.size()];
-    // // char vertex_buff[vertex_sz * 2 * sites.size()] = {};
-    // auto vertex_buff = new char[event_sz * 2 * sites.size()];
-    // // char he_buff[he_sz * 3 * sites.size()] = {};
-    // auto he_buff = new char[event_sz * 3 * sites.size()];
-    // std::cout << "allocating done" << std::endl;
     
     priority_queue_t<_details::event_t<traits>> event_queue(sites.size());
 

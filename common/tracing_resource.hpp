@@ -12,18 +12,18 @@ namespace dvoronoi::memory_management {
 
 class tracing_resource final : public std::pmr::memory_resource {
 public:
-    tracing_resource(std::ostream& out, std::pmr::memory_resource* next = std::pmr::get_default_resource())
-        : _out(out), _next(next) {}
+    tracing_resource(const std::string& name, std::ostream& out, std::pmr::memory_resource* next = std::pmr::get_default_resource())
+        : _name(name), _out(out), _next(next) {}
 
 private:
     void* do_allocate(std::size_t bytes, std::size_t align) override {
         auto* addr = _next->allocate(bytes, align);
-        _out << "allocate(" << bytes << ", " << align << ") -> " << addr << std::endl;
+        _out << '[' << _name << "] allocate(" << bytes << ", " << align << ") -> " << addr << std::endl;
         return addr;
     }
 
     void do_deallocate(void* addr, std::size_t bytes, std::size_t align) override {
-        _out << "deallocate(" << addr << ", " << bytes << ", " << align << ")\n";
+        _out << '[' << _name << "] deallocate(" << addr << ", " << bytes << ", " << align << ")\n";
         _next->deallocate(addr, bytes, align);
     }
 
@@ -33,6 +33,7 @@ private:
     }
 
 private:
+    std::string _name;
     std::ostream& _out;
     std::pmr::memory_resource* _next;
 };

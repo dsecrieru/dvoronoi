@@ -10,7 +10,7 @@
 typedef double scalar_t;
 constexpr scalar_t width = 3840;
 constexpr scalar_t height = 2160;
-constexpr std::size_t runs = 100;
+constexpr std::size_t runs = 1000;
 constexpr std::size_t count = 100000;
 
 template<typename T>
@@ -43,7 +43,7 @@ void bench(std::size_t sites_count) {
         auto run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         durations.push_back(run_duration);
 
-        std::cout << "finished run " << r << " in " << run_duration << std::endl;
+        std::cout << "finished run " << std::setw(3) << r << " in " << run_duration << std::endl;
     }
 
     const auto avg_duration = std::reduce(durations.begin(), durations.end()) / float(durations.size());

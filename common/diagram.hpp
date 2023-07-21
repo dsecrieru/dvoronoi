@@ -80,32 +80,27 @@ namespace dvoronoi {
         typedef diag_traits::half_edge_t half_edge_t;
 
     private:
-        //memory_management::tracing_resource _tracing_res{std::cout};
-        // std::pmr::monotonic_buffer_resource _res;
-        // std::pmr::unsynchronized_pool_resource _pool;
-        //std::pmr::unsynchronized_pool_resource _res{&_tracing_res};
+        //memory_management::tracing_resource _tracing_vert{"vert", std::cout, std::pmr::null_memory_resource()};
         std::unique_ptr<std::byte[]> _vert_buf;
-        std::pmr::monotonic_buffer_resource _vert_res;//std::pmr::unsynchronized_pool_resource _vert_res{};
-        //std::pmr::unsynchronized_pool_resource _vert_pool;
+        std::pmr::monotonic_buffer_resource _vert_res;
+        //memory_management::tracing_resource _tracing_he{"he  ", std::cout, std::pmr::null_memory_resource()};
         std::unique_ptr<std::byte[]> _he_buf;
         std::pmr::monotonic_buffer_resource _he_res;
-        //std::pmr::unsynchronized_pool_resource _he_res{};
 
     public:
         std::vector<site_t> sites{};
         std::vector<face_t> faces{};
-        //std::pmr::list<vertex_t> vertices{&_vert_res}; // requires pointer stability
-        std::pmr::list<vertex_t> vertices; // requires pointer stability
-        //std::pmr::list<half_edge_t> half_edges{&_he_res}; // requires pointer stability, stored in arc
-        std::pmr::list<half_edge_t> half_edges; // requires pointer stability, stored in arc
+        std::pmr::vector<vertex_t> vertices{&_vert_res}; // requires pointer stability, so no re-allocation allowed
+        std::pmr::vector<half_edge_t> half_edges{&_he_res}; // requires pointer stability, so no re-allocation allowed
 
         explicit diagram_t(std::size_t n)
-            : _vert_buf(new std::byte[2 * n * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], 2 * n * sizeof(vertex_t)/*, &_tracing_res*/), vertices(&_vert_res)
-            //: _vert_res(3 * n * sizeof(vertex_t) + 5 * sizeof(vertex_t), &_tracing_res), vertices(&_vert_res)
-            , _he_buf(new std::byte[3 * n * sizeof(half_edge_t) + (n / 5) * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 3 * n * sizeof(half_edge_t) + (n / 5) * sizeof(half_edge_t)/*, &_tracing_res*/), half_edges(&_he_res)
+            : _vert_buf(new std::byte[(2 * n + 10) * sizeof(vertex_t)]), _vert_res(&_vert_buf[0], (2 * n + 10) * sizeof(vertex_t), std::pmr::null_memory_resource()/*&_tracing_vert*/)
+            , _he_buf(new std::byte[6 * n * sizeof(half_edge_t)]), _he_res(&_he_buf[0], 6 * n * sizeof(half_edge_t), std::pmr::null_memory_resource()/*&_tracing_he*/)
         {
             sites.reserve(n);
             faces.reserve(n);
+            vertices.reserve(2 * n + 10);
+            half_edges.reserve(6 * n);
         }
 
         vertex_t* create_vertex(const _internal::point2_t& point) {
