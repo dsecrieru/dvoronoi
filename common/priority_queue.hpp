@@ -35,17 +35,13 @@ namespace dvoronoi {
         [[nodiscard]] bool empty() const { return _elements.empty(); }
         [[nodiscard]] std::size_t size() const { return _elements.size(); }
 
-        void push(std::unique_ptr<T>&& elem) {
-            elem->index = _elements.size();
-            _elements.emplace_back(std::move(elem));
-            sift_up(_elements.size() - 1);
-        }
-
         template<class... Args>
-        void emplace(Args&&... args) {
+        T* emplace(Args&&... args) {
             const auto& elem = _elements.emplace_back(std::make_unique<T>(args...));
+            T* ret = elem.get();
             elem->index = _elements.size() - 1;
             sift_up(_elements.size() - 1);
+            return ret;
         }
 
         std::unique_ptr<T> pop() {

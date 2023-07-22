@@ -80,9 +80,7 @@ namespace dvoronoi::fortune::_details {
         if (!left_bp_moving_towards_cp || !right_bp_moving_towards_cp)
             return;
 
-        auto new_event = std::make_unique<event_t>(event_y, convergence_point.value(), middle);
-        middle->event = new_event.get();
-        event_queue.push(std::move(new_event));
+        middle->event = event_queue.emplace(event_y, convergence_point.value(), middle);
     }
 
     void invalidate_circle_event(auto* arc, auto& event_queue) {
