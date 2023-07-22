@@ -10,8 +10,8 @@ namespace dvoronoi::fortune::_details {
     template<typename arc_t>
     class arc_tree_t {
     protected:
-//#define USE_PMR
-#ifdef USE_PMR
+//#define BL_USE_PMR
+#ifdef BL_USE_PMR
         using allocator_type = std::pmr::polymorphic_allocator<>;
         //memory_management::tracing_resource _tracing_res{"beach_line"};
         std::pmr::monotonic_buffer_resource _res{/*&_tracing_res*/};
@@ -38,7 +38,7 @@ namespace dvoronoi::fortune::_details {
         arc_t* new_arc(Args&&... args) {
             // ++this->allocations;
             // this->max_allocations = std::max(this->allocations, this->max_allocations);
-#ifdef USE_PMR
+#ifdef BL_USE_PMR
             return _allocator.new_object<arc_t>(std::forward<Args>(args)...);
 #else
             return new arc_t { std::forward<Args>(args)... };
@@ -46,7 +46,7 @@ namespace dvoronoi::fortune::_details {
         }
         
         void delete_arc(arc_t* arc) {
-#ifdef USE_PMR
+#ifdef BL_USE_PMR
             _allocator.delete_object(arc);
 #else
             delete arc;
