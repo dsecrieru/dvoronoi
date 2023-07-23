@@ -78,6 +78,7 @@ namespace dvoronoi {
         typedef diag_traits::face_t face_t;
         typedef diag_traits::vertex_t vertex_t;
         typedef diag_traits::half_edge_t half_edge_t;
+        typedef std::vector<std::vector<std::size_t>> triangulation_t;
 
 //#define DIAG_USE_PMR
 #ifdef DIAG_USE_PMR
@@ -100,6 +101,7 @@ namespace dvoronoi {
         std::vector<vertex_t> vertices{}; // requires pointer stability, so no re-allocation allowed
         std::vector<half_edge_t> half_edges{}; // requires pointer stability, so no re-allocation allowed
 #endif
+        std::unique_ptr<triangulation_t> triangulation{};
 
         explicit diagram_t(std::size_t n)
 #ifdef DIAG_USE_PMR
@@ -140,6 +142,27 @@ namespace dvoronoi {
                     return create_vertex({ box.right, box.top });
                 default:
                     return nullptr;
+            }
+        }
+
+        void generate_delauney() {
+            triangulation = std::make_unique<triangulation_t>(sites.size());
+
+            for(auto i = 0; i < sites.size(); ++i) {
+                const auto& face = faces[i];
+                auto half_edge = face.half_edge;
+                while (half_edge->prev != nullptr) {
+                    half_edge = half_edge->prev;
+                    if (half_edge == face.half_edge)
+                        break;
+                }
+                while (half_edge != nullptr) {
+                    if (half_edge->twin != nullptr)
+                        (*triangulation)[i].push_back(half_edge->twin->face->site->index);
+                    half_edge = half_edge->next;
+                    if (half_edge == face.half_edge)
+                        break;
+                }
             }
         }
     };
