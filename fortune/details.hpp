@@ -155,11 +155,12 @@ namespace dvoronoi::fortune::_details {
 
         beach_line_t<diag_traits> beach_line;
 
+//#define MEM_PROFILING
 #ifdef MEM_PROFILING
     auto event_sz = sizeof(_details::event_t<diag_traits>);
+    auto arc_sz = sizeof(typename beach_line_t<diag_traits>::arc_t);
     auto vertex_sz = sizeof(typename diag_traits::vertex_t);
     auto he_sz = sizeof(typename diag_traits::half_edge_t);
-    auto arc_sz = sizeof(typename beach_line_t<diag_traits>::arc_t);
     std::cout << "event sz:  " << event_sz << std::endl;
     std::cout << "arc sz:    " << arc_sz << std::endl;
     std::cout << "vertex sz: " << vertex_sz << std::endl;

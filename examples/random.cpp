@@ -3,8 +3,6 @@
 #include <numeric>
 #include <iostream>
 
-//#define MEM_PROFILING
-
 #include <dvoronoi/fortune/algorithm.hpp>
 
 typedef double scalar_t;
