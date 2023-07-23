@@ -19,7 +19,7 @@ const int height = 1024;
 const float edge = 100;
 const std::size_t SITES_COUNT = 2500;
 
-const uint8_t bg_comp = 65;
+const uint8_t bg_comp = 60;
 const sf::Color bg_col(bg_comp, bg_comp, bg_comp);
 const sf::Color site_col(244, 108, 63);
 const sf::Color edge_col(46, 149, 153);

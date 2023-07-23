@@ -84,7 +84,7 @@ namespace dvoronoi::fortune::_details {
         {
             auto y = arc;
             auto y_original_color = y->color;
-            auto x = this->_nil;
+            arc_t* x;
 
             if (is_nil(arc->left)) {
                 x = arc->right;

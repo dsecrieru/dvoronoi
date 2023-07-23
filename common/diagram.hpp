@@ -79,9 +79,9 @@ namespace dvoronoi {
         typedef diag_traits::vertex_t vertex_t;
         typedef diag_traits::half_edge_t half_edge_t;
 
-    private:
 //#define DIAG_USE_PMR
 #ifdef DIAG_USE_PMR
+    private:
         //memory_management::tracing_resource _tracing_vert{"vert", std::pmr::null_memory_resource()};
         std::unique_ptr<std::byte[]> _vert_buf;
         std::pmr::monotonic_buffer_resource _vert_res;

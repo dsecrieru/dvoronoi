@@ -84,7 +84,7 @@ namespace dvoronoi::fortune::_details {
         for (auto& kv : vertices)
             all_bounded = add_corners(box, linked_vertices, kv.second, diag) && all_bounded;
 
-        for (auto& kv : vertices)
+        for (const auto& kv : vertices)
             join_half_edges(kv.first, kv.second, diag);
 
         return all_bounded;
