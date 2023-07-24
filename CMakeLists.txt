@@ -12,10 +12,13 @@ set(CMAKE_CXX_STANDARD 20)
 #FetchContent_MakeAvailable(ref_std_generator)
 
 add_library(dvoronoi INTERFACE
+        common/scalar.hpp
         common/point.hpp
         common/util.hpp
         common/diagram.hpp
+        common/box.hpp
         common/priority_queue.hpp
+        fortune/config.hpp
         fortune/algorithm.hpp
         fortune/beach_line.hpp
         fortune/event.hpp

@@ -7,15 +7,10 @@
 
 #include <cassert>
 
+#include "config.hpp"
 #include "event.hpp"
 #include "beach_line.hpp"
 #include "bound.hpp"
-
-namespace dvoronoi::fortune {
-    struct config_t {
-        bool do_bound = true;
-    };
-}
 
 namespace dvoronoi::fortune::_details {
 
@@ -192,8 +187,8 @@ namespace dvoronoi::fortune::_details {
             }
         }
 
-        if (config.do_bound) {
-            bound(diagram, beach_line);
+        if (config.bounding_box.has_value()) {
+            bound(diagram, config.bounding_box.value(), beach_line);
         }
 
         // std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << std::endl;

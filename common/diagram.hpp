@@ -9,39 +9,30 @@
 #include <list>
 
 #include "point.hpp"
+#include "box.hpp"
+
+//#define DIAG_USE_PMR
+#ifdef DIAG_USE_PMR
 #include "tracing_resource.hpp"
+#endif
 
 namespace dvoronoi {
-
-    namespace _internal {
-        namespace box_side {
-            constexpr std::size_t Left = 0;
-            constexpr std::size_t Bottom = 1;
-            constexpr std::size_t Right = 2;
-            constexpr std::size_t Top = 3;
-        }
-
-        struct box_t {
-            _internal::scalar_t left = -std::numeric_limits<_internal::scalar_t>::infinity();
-            _internal::scalar_t bottom = std::numeric_limits<_internal::scalar_t>::infinity();
-            _internal::scalar_t right = std::numeric_limits<_internal::scalar_t>::infinity();
-            _internal::scalar_t top = - std::numeric_limits<_internal::scalar_t>::infinity();
-        };
-    }
-
     namespace data {
+        typedef _internal::scalar_t scalar_t;
+        typedef _internal::point2_t point_t;
+
         struct face_t;
 
         struct site_t {
             std::size_t index;
-            _internal::point2_t point{};
+            point_t point{};
             face_t* face = nullptr;
 
-            explicit site_t(std::size_t i, _internal::scalar_t x, _internal::scalar_t y) : index(i), point(x, y) {}
+            explicit site_t(std::size_t i, scalar_t x, scalar_t y) : index(i), point(x, y) {}
         };
 
         struct vertex_t {
-            _internal::point2_t point{};
+            point_t point{};
         };
 
         struct half_edge_t {
@@ -63,7 +54,7 @@ namespace dvoronoi {
     template<typename out_point_t>
     struct diag_traits {
         typedef out_point_t point_t;
-        typedef _internal::scalar_t scalar_t;
+        typedef data::scalar_t scalar_t;
         typedef data::site_t site_t;
         typedef data::face_t face_t;
         typedef data::vertex_t vertex_t;
@@ -80,7 +71,6 @@ namespace dvoronoi {
         typedef diag_traits::half_edge_t half_edge_t;
         typedef std::vector<std::vector<std::size_t>> triangulation_t;
 
-//#define DIAG_USE_PMR
 #ifdef DIAG_USE_PMR
     private:
         //memory_management::tracing_resource _tracing_vert{"vert", std::pmr::null_memory_resource()};
@@ -115,7 +105,7 @@ namespace dvoronoi {
             half_edges.reserve(6 * n);
         }
 
-        vertex_t* create_vertex(const _internal::point2_t& point) {
+        vertex_t* create_vertex(const data::point_t& point) {
             vertices.emplace_back(point);
             //vertices.back().it = std::prev(vertices.end());
             return &vertices.back();
@@ -130,22 +120,22 @@ namespace dvoronoi {
             return &half_edges.back();
         }
 
-        vertex_t* create_corner(const _internal::box_t& box, std::size_t side) {
+        vertex_t* create_corner(const box_t& box, std::size_t side) {
             switch (side) {
-                case _internal::box_side::Left:
+                case box_side::Left:
                     return create_vertex({ box.left, box.top });
-                case _internal::box_side::Bottom:
+                case box_side::Bottom:
                     return create_vertex({ box.left, box.bottom });
-                case _internal::box_side::Right:
+                case box_side::Right:
                     return create_vertex({ box.right, box.bottom });
-                case _internal::box_side::Top:
+                case box_side::Top:
                     return create_vertex({ box.right, box.top });
                 default:
                     return nullptr;
             }
         }
 
-        void generate_delauney() {
+        void generate_delaunay() {
             triangulation = std::make_unique<triangulation_t>(sites.size());
 
             for(auto i = 0; i < sites.size(); ++i) {
@@ -165,7 +155,7 @@ namespace dvoronoi {
                 }
             }
         }
-    };
+    }; // class diagram_t
 
 } // namespace dvoronoi
 

@@ -5,12 +5,16 @@
 #ifndef DVORONOI_ARC_TREE_HPP
 #define DVORONOI_ARC_TREE_HPP
 
+//#define BL_USE_PMR
+#ifdef BL_USE_PMR
+#include "tracing_resource.hpp"
+#endif
+
 namespace dvoronoi::fortune::_details {
 
     template<typename arc_t>
     class arc_tree_t {
     protected:
-//#define BL_USE_PMR
 #ifdef BL_USE_PMR
         using allocator_type = std::pmr::polymorphic_allocator<>;
         //memory_management::tracing_resource _tracing_res{"beach_line"};

@@ -16,6 +16,7 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
+const dvoronoi::fortune::config_t config{ dvoronoi::box_t{-0.5, -0.5, width + 0.5, height + 0.5} };
 const float edge = 100;
 const std::size_t SITES_COUNT = 200;
 
@@ -86,8 +87,8 @@ int main() {
     std::vector<point_t> move_vec;
     populate_or_append(sites, move_vec, SITES_COUNT);
 
-    auto diagram = dvoronoi::fortune::generate(sites, {});
-    diagram->generate_delauney();
+    auto diagram = dvoronoi::fortune::generate(sites, config);
+    diagram->generate_delaunay();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
 
@@ -140,51 +141,48 @@ int main() {
         }
 
         if (add_sites || sub_sites) {
-            diagram = dvoronoi::fortune::generate(sites, {});
-            diagram->generate_delauney();
+            diagram = dvoronoi::fortune::generate(sites, config);
+            diagram->generate_delaunay();
 
             add_sites = sub_sites = false;
         }
 
-        if (do_draw_voronoi)
-            draw_voronoi(window, *diagram);
-
         if (do_draw_triang)
             draw_triang(window, *diagram);
+
+        if (do_draw_voronoi)
+            draw_voronoi(window, *diagram);
 
         for (const auto& p : sites)
             window.draw(get_shape(radius, p.x, p.y, site_col));
 
-        if (index > diagram->sites.size() - 1) {
-            window.display();
-            std::this_thread::sleep_for(10ms);
-            continue;
-        }
+        if (index > diagram->sites.size() - 1)
+            index = 0;
 
-//        auto site = diagram->sites[index];
-//        auto face = site.face;
-//        window.draw(get_shape(radius, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
+        auto site = diagram->sites[index];
+        auto face = site.face;
+        window.draw(get_shape(radius, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
-        // auto first_he = face->half_edge;
-        // auto he = first_he;
-        // bool missing_ends = false;
-        // bool missing_he = false;
-        // do {
-        //     if (!he->orig || !he->dest) {
-        //         missing_ends = true;
-        //         he = he->next;
-        //         continue;
-        //     }
+         auto first_he = face->half_edge;
+         auto he = first_he;
+         bool missing_ends = false;
+         bool missing_he = false;
+         do {
+             if (!he->orig || !he->dest) {
+                 missing_ends = true;
+                 he = he->next;
+                 continue;
+             }
 
-        //     std::array<sf::Vertex, 2> line = {
-        //         sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
-        //         sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
-        //     };
-        //     window.draw(line.data(), 2, sf::Lines);
-        //     he = he->next;
-        //     if (!he)
-        //         missing_he = true;
-        // } while (he && he != first_he);
+             std::array<sf::Vertex, 2> line = {
+                 sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
+                 sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
+             };
+             window.draw(line.data(), 2, sf::Lines);
+             he = he->next;
+             if (!he)
+                 missing_he = true;
+         } while (he && he != first_he);
 
         window.display();
 
@@ -203,8 +201,8 @@ int main() {
                 }
             }
 
-            diagram = dvoronoi::fortune::generate(sites, {});
-            diagram->generate_delauney();
+            diagram = dvoronoi::fortune::generate(sites, config);
+            diagram->generate_delaunay();
         }
 
         std::this_thread::sleep_for(10ms);

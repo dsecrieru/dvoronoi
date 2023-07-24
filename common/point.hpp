@@ -7,9 +7,9 @@
 
 #include <cmath>
 
-namespace dvoronoi::_internal {
+#include "scalar.hpp"
 
-    typedef double scalar_t;
+namespace dvoronoi::_internal {
 
     struct point2_t;
     point2_t operator-(point2_t lhs, const point2_t& rhs);

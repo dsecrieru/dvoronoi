@@ -3,7 +3,7 @@ Currently, *dvoronoi* implements Fortune's algorithm for generating Voronoi diag
 
 ![dvoronoi example](./images/dvoronoi_20230712_01.png)
 
-![delauney example](./images/delauney_20230723_01.png)
+![delaunay example](./images/delaunay_20230723_01.png)
 
 It is a header-only, C++20 implementation, built and tested on:
 - Windows 10, VS 2017, compiler version 19.36.32532
@@ -12,6 +12,12 @@ It is a header-only, C++20 implementation, built and tested on:
 ## Motivation
 I wanted to try using Voronoi diagrams in a different project and decided to try my hand at my own implementation, as I thought it's a good opportunity to learn more about algorithms and data structures, new C++ standards, performance profiling and so on.
 Performance of my own implementation was worse than Pierre's, so I decided to fork his and see if there are any optimization opportunities left from there.
+
+# Features
+- generates Voronoi diagrams using Fortune's sweep line algorithm
+- Delaunay triangulation can be obtained from Voronoi diagram
+- point parametrization: any point type can be plugged in
+- good numerical stability due to double precision being used internally
 
 # Structure
 |                 |                                                                                                          |
@@ -25,3 +31,5 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
 # Performance
 On my AMD Ryzen 9 5900X 4.2GHz with 64GB of RAM, Windows 10 with MSVC, it computes the Voronoi diagram for 100K random points (including bounding) in about 220ms, which is (not surprisingly) similar to *MyGAL*'s performance.
 After playing around with pmr and custom allocators, I found a few optimization opportunities, that brought the performance gain over *MyGAL* to about 13% on linux and 24% on Windows. Using custom allocators did not seem to bring much on linux, and a relatively small improvement on Windows (about 4%), so I decided to leave them disabled.
+
+I've also compared to Mathias Westerdahl's *jcv* implementation in C (https://github.com/JCash/voronoi). Unfortunately, it was not stable for 100K points, unless switched to using double precision. In that case, *dvoronoi* is about 29% faster on Windows.  

@@ -15,34 +15,34 @@ namespace dvoronoi::fortune::_details {
     struct intersection_t
     {
         std::size_t side;
-        _internal::point2_t point;
+        dvoronoi::data::point_t point;
     };
 
     intersection_t first_intersection(const auto& box, const auto& origin, const auto& direction) {
         auto intersection = intersection_t{};
 
-        auto t = std::numeric_limits<_internal::scalar_t>::infinity();
+        auto t = std::numeric_limits<dvoronoi::data::scalar_t>::infinity();
 
         if (direction.x > 0.0) {
             t = (box.right - origin.x) / direction.x;
-            intersection.side = _internal::box_side::Right;
+            intersection.side = box_side::Right;
             intersection.point = origin + t * direction;
         } else if (direction.x < 0.0) {
             t = (box.left - origin.x) / direction.x;
-            intersection.side = _internal::box_side::Left;
+            intersection.side = box_side::Left;
             intersection.point = origin + t * direction;
         }
 
         if (direction.y > 0.0) {
             auto u = (box.top - origin.y) / direction.y;
             if (u < t) {
-                intersection.side = _internal::box_side::Top;
+                intersection.side = box_side::Top;
                 intersection.point = origin + u * direction;
             }
         } else if (direction.y < 0.0) {
             auto u = (box.bottom - origin.y) / direction.y;
             if (u < t) {
-                intersection.side = _internal::box_side::Bottom;
+                intersection.side = box_side::Bottom;
                 intersection.point = origin + u * direction;
             }
         }
@@ -59,10 +59,9 @@ namespace dvoronoi::fortune::_details {
     typedef std::list<linked_vertex_t> linked_vertices_t;
     typedef std::unordered_map<std::size_t, std::array<linked_vertex_t*, 8>> vertices_t;
 
-    bool bound(auto& diag, auto& beach_line) {
+    bool bound(auto& diag, box_t box, auto& beach_line) {
         bool all_bounded = true;
 
-        _internal::box_t box;
         for (const auto& vertex : diag.vertices) {
             box.left = std::min(vertex.point.x, box.left);
             box.bottom = std::min(vertex.point.y, box.bottom);
