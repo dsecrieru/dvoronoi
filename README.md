@@ -1,11 +1,11 @@
 # Description
-Currently, *dvoronoi* implements Fortune's algorithm for generating Voronoi diagrams. It is, more or less, a fork of Pierre Vigier excellent C++ implementation (https://github.com/pvigier/MyGAL).
+Currently, *dvoronoi* implements Fortune's algorithm for generating Voronoi diagrams. It is, more or less, a fork of Pierre Vigier's excellent C++ implementation (https://github.com/pvigier/MyGAL).
 
 ![dvoronoi example](./images/dvoronoi_20230712_01.png)
 
 ![delauney example](./images/delauney_20230723_01.png)
 
-It's a header-only, C++20 implementation, built and tested on:
+It is a header-only, C++20 implementation, built and tested on:
 - Windows 10, VS 2017, compiler version 19.36.32532
 - WSL Ubuntu 23.04, GCC 13.0.1
 
