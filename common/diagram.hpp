@@ -53,7 +53,7 @@ namespace dvoronoi {
 
     template<typename out_point_t>
     struct diag_traits {
-        typedef out_point_t point_t;
+        typedef out_point_t out_point_t;
         typedef data::scalar_t scalar_t;
         typedef data::site_t site_t;
         typedef data::face_t face_t;
@@ -64,7 +64,6 @@ namespace dvoronoi {
     template<typename diag_traits>
     class diagram_t {
     public:
-        typedef diag_traits::point_t point_t;
         typedef diag_traits::site_t site_t;
         typedef diag_traits::face_t face_t;
         typedef diag_traits::vertex_t vertex_t;

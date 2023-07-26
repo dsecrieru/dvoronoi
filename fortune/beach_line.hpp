@@ -11,12 +11,12 @@
 
 namespace dvoronoi::fortune::_details {
 
-    template<typename diag_t>
-    class beach_line_t : private arc_tree_t<data::arc_t<diag_t>> {
+    template<typename diag_traits>
+    class beach_line_t : private arc_tree_t<data::arc_t<diag_traits>> {
     public:
-        typedef data::arc_t<diag_t> arc_t;
-        typedef diag_t::scalar_t scalar_t;
-        typedef diag_t::site_t site_t;
+        typedef data::arc_t<diag_traits> arc_t;
+        typedef diag_traits::scalar_t scalar_t;
+        typedef diag_traits::site_t site_t;
 
         beach_line_t() : arc_tree_t<arc_t>() {}
         ~beach_line_t() {
@@ -62,8 +62,8 @@ namespace dvoronoi::fortune::_details {
         auto compute_breakpoint(const auto& p1, const auto& p2, auto sweep_y, typename arc_t::side_t side) const;
     };
 
-    template<typename diag_t>
-    auto beach_line_t<diag_t>::arc_above(const auto& point, auto sweep_y) const {
+    template<typename diag_traits>
+    auto beach_line_t<diag_traits>::arc_above(const auto& point, auto sweep_y) const {
         auto node = this->_root;
         bool found = false;
 
@@ -87,8 +87,8 @@ namespace dvoronoi::fortune::_details {
         return node;
     }
 
-    template<typename diag_t>
-    auto beach_line_t<diag_t>::break_arc(arc_t* arc, site_t* site) {
+    template<typename diag_traits>
+    auto beach_line_t<diag_traits>::break_arc(arc_t* arc, site_t* site) {
         auto middle_arc = create_arc(site, arc_t::side_t::Left);
 
         auto left_arc = create_arc(arc->site, arc_t::side_t::Left);
@@ -106,8 +106,8 @@ namespace dvoronoi::fortune::_details {
         return middle_arc;
     }
 
-    template<typename diag_t>
-    auto beach_line_t<diag_t>::compute_breakpoint(const auto& p1, const auto& p2, auto sweep_y, typename arc_t::side_t side) const {
+    template<typename diag_traits>
+    auto beach_line_t<diag_traits>::compute_breakpoint(const auto& p1, const auto& p2, auto sweep_y, typename arc_t::side_t side) const {
         auto x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
 
         if (util::eq(y1, y2)) {
