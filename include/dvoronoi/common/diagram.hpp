@@ -8,7 +8,7 @@
 #include <vector>
 #include <list>
 
-#include "point.hpp"
+#include "data.hpp"
 #include "box.hpp"
 
 //#define DIAG_USE_PMR
@@ -17,50 +17,18 @@
 #endif
 
 namespace dvoronoi {
-    namespace data {
-        typedef _internal::scalar_t scalar_t;
-        typedef _internal::point2_t point_t;
-
-        struct face_t;
-
-        struct site_t {
-            std::size_t index;
-            point_t point{};
-            face_t* face = nullptr;
-
-            explicit site_t(std::size_t i, scalar_t x, scalar_t y) : index(i), point(x, y) {}
-        };
-
-        struct vertex_t {
-            point_t point{};
-        };
-
-        struct half_edge_t {
-            vertex_t* orig = nullptr;
-            vertex_t* dest = nullptr;
-            half_edge_t* twin = nullptr;
-            face_t* face = nullptr;
-
-            half_edge_t* prev = nullptr;
-            half_edge_t* next = nullptr;
-        };
-
-        struct face_t {
-            site_t* site = nullptr;
-            half_edge_t* half_edge = nullptr;
-        };
-    } // namespace data
-
-    template<typename out_point_t>
+    template<typename point_t>
     struct diag_traits {
-        typedef out_point_t out_point_t;
+        typedef point_t out_point_t;
         typedef data::scalar_t scalar_t;
         typedef data::site_t site_t;
         typedef data::face_t face_t;
         typedef data::vertex_t vertex_t;
         typedef data::half_edge_t half_edge_t;
     };
+}
 
+namespace dvoronoi::voronoi {
     template<typename diag_traits>
     class diagram_t {
     public:
@@ -156,6 +124,11 @@ namespace dvoronoi {
         }
     }; // class diagram_t
 
-} // namespace dvoronoi
+} // namespace dvoronoi::voronoi
+
+namespace dvoronoi {
+    template<typename point_t>
+    using voronoi_diagram_t = voronoi::diagram_t<diag_traits<point_t>>;
+}
 
 #endif //DVORONOI_COMMON_DIAGRAM_HPP

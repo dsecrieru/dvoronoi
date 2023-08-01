@@ -17,7 +17,7 @@ namespace dvoronoi::fortune {
 template<typename point_t>
 auto generate(const std::vector<point_t>& sites, const config_t& config = config_t{}) {
     typedef diag_traits<point_t> traits;
-    typedef diagram_t<traits> diag_t;
+    typedef voronoi_diagram_t<point_t> diag_t;
     auto diagram = std::make_unique<diag_t>(sites.size());
     
     priority_queue_t<_details::event_t<traits>> event_queue(sites.size());
