@@ -12,7 +12,7 @@
 namespace dvoronoi::_internal {
 
     struct point2_t;
-    point2_t operator-(point2_t lhs, const point2_t& rhs);
+    static point2_t operator-(point2_t lhs, const point2_t& rhs);
 
     struct point2_t {
         scalar_t x{};
@@ -28,12 +28,12 @@ namespace dvoronoi::_internal {
         [[nodiscard]] scalar_t dist(const point2_t& p) const { return (*this - p).norm(); }
     };
 
-    point2_t operator+(point2_t lhs, const point2_t& rhs) {
+    static point2_t operator+(point2_t lhs, const point2_t& rhs) {
         lhs += rhs;
         return lhs;
     }
 
-    point2_t operator-(point2_t lhs, const point2_t& rhs) {
+    static point2_t operator-(point2_t lhs, const point2_t& rhs) {
         lhs -= rhs;
         return lhs;
     }

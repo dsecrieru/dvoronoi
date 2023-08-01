@@ -12,22 +12,22 @@ set(CMAKE_CXX_STANDARD 20)
 #FetchContent_MakeAvailable(ref_std_generator)
 
 add_library(dvoronoi INTERFACE
-        common/scalar.hpp
-        common/point.hpp
-        common/util.hpp
-        common/diagram.hpp
-        common/box.hpp
-        common/priority_queue.hpp
-        fortune/config.hpp
-        fortune/algorithm.hpp
-        fortune/beach_line.hpp
-        fortune/event.hpp
-        fortune/arc.hpp
-        fortune/arc_tree.hpp
-        fortune/bound.hpp)
+        include/dvoronoi/common/scalar.hpp
+        include/dvoronoi/common/point.hpp
+        include/dvoronoi/common/util.hpp
+        include/dvoronoi/common/diagram.hpp
+        include/dvoronoi/common/box.hpp
+        include/dvoronoi/common/priority_queue.hpp
+        include/dvoronoi/fortune/config.hpp
+        include/dvoronoi/fortune/algorithm.hpp
+        include/dvoronoi/fortune/beach_line.hpp
+        include/dvoronoi/fortune/event.hpp
+        include/dvoronoi/fortune/arc.hpp
+        include/dvoronoi/fortune/arc_tree.hpp
+        include/dvoronoi/fortune/bound.hpp)
 
-target_include_directories(dvoronoi INTERFACE ${stdgenerator_SOURCE_DIR}/include ..)
-target_include_directories(dvoronoi INTERFACE ..)
+#target_include_directories(dvoronoi INTERFACE ${stdgenerator_SOURCE_DIR}/include ..)
+target_include_directories(dvoronoi INTERFACE "${CMAKE_CURRENT_LIST_DIR}/include")
 
 add_subdirectory(benchmark)
 add_subdirectory(examples)
