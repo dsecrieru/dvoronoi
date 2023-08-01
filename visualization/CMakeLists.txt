@@ -17,7 +17,7 @@ set(SFML_BUILD_GRAPHICS ON)
 set(SFML_BUILD_WINDOW ON)
 FetchContent_MakeAvailable(SFML)
 
-include_directories(${PROJECT_SOURCE_DIR}/../..)
+include_directories(${PROJECT_SOURCE_DIR}/../include)
 
 add_executable(visualization visualization.cpp)
 target_link_libraries(visualization PRIVATE sfml-graphics)

@@ -20,8 +20,8 @@ FetchContent_MakeAvailable(MyGAL)
 
 add_executable(benchmark benchmark.cpp)
 
-include_directories(${PROJECT_SOURCE_DIR}/../..)
 target_include_directories(benchmark PRIVATE
 #        ${jcv_SOURCE_DIR}/src
         ${MyGAL_SOURCE_DIR}/include
 )
+target_link_libraries(benchmark PRIVATE dvoronoi)
