@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <list>
+#include <cassert>
 
 #include "data.hpp"
 #include "box.hpp"
@@ -37,6 +38,7 @@ namespace dvoronoi::voronoi {
         typedef diag_traits::vertex_t vertex_t;
         typedef diag_traits::half_edge_t half_edge_t;
         typedef std::vector<std::vector<std::size_t>> triangulation_t;
+        typedef std::vector<std::size_t> convex_hull_t;
 
 #ifdef DIAG_USE_PMR
     private:
@@ -59,6 +61,7 @@ namespace dvoronoi::voronoi {
         std::vector<half_edge_t> half_edges{}; // requires pointer stability, so no re-allocation allowed
 #endif
         std::unique_ptr<triangulation_t> triangulation{};
+        std::unique_ptr<convex_hull_t> convex_hull{};
 
         explicit diagram_t(std::size_t n)
 #ifdef DIAG_USE_PMR
@@ -122,6 +125,33 @@ namespace dvoronoi::voronoi {
                 }
             }
         }
+
+        void compute_convex_hull() {
+            auto n = sites.size();
+            assert(n > 3);
+
+            convex_hull = std::make_unique<convex_hull_t>(2 * n);
+
+            auto sorted(sites);
+            std::ranges::sort(sorted, [](const site_t& s1, const site_t& s2) {
+                return s1.point.x < s2.point.x || (s1.point.x == s2.point.x && s1.point.y < s2.point.y);
+            });
+
+            std::size_t k = 0;
+
+            for (size_t i = 0; i < n; ++i) {
+                while (k >= 2 && sites[(*convex_hull)[k - 2]].point.cross(sites[(*convex_hull)[k - 1]].point, sorted[i].point) <= 0) --k;
+                (*convex_hull)[k++] = sorted[i].index;
+            }
+
+            for (size_t i = n - 1, t = k + 1; i > 0; --i) {
+                while (k >= t && sites[(*convex_hull)[k - 2]].point.cross(sites[(*convex_hull)[k - 1]].point, sorted[i - 1].point) <= 0) --k;
+                (*convex_hull)[k++] = sorted[i - 1].index;
+            }
+
+            convex_hull->resize(k - 1);
+        }
+
     }; // class diagram_t
 
 } // namespace dvoronoi::voronoi

@@ -12,44 +12,6 @@
 
 namespace dvoronoi::fortune::_details {
 
-    struct intersection_t
-    {
-        std::size_t side;
-        dvoronoi::data::point_t point;
-    };
-
-    intersection_t first_intersection(const auto& box, const auto& origin, const auto& direction) {
-        auto intersection = intersection_t{};
-
-        auto t = std::numeric_limits<dvoronoi::data::scalar_t>::infinity();
-
-        if (direction.x > 0.0) {
-            t = (box.right - origin.x) / direction.x;
-            intersection.side = box_side::Right;
-            intersection.point = origin + t * direction;
-        } else if (direction.x < 0.0) {
-            t = (box.left - origin.x) / direction.x;
-            intersection.side = box_side::Left;
-            intersection.point = origin + t * direction;
-        }
-
-        if (direction.y > 0.0) {
-            auto u = (box.top - origin.y) / direction.y;
-            if (u < t) {
-                intersection.side = box_side::Top;
-                intersection.point = origin + u * direction;
-            }
-        } else if (direction.y < 0.0) {
-            auto u = (box.bottom - origin.y) / direction.y;
-            if (u < t) {
-                intersection.side = box_side::Bottom;
-                intersection.point = origin + u * direction;
-            }
-        }
-
-        return intersection;
-    }
-
     struct linked_vertex_t {
         dvoronoi::data::half_edge_t* prev_half_edge = nullptr;
         dvoronoi::data::vertex_t* vertex = nullptr;
@@ -87,6 +49,44 @@ namespace dvoronoi::fortune::_details {
             join_half_edges(kv.first, kv.second, diag);
 
         return all_bounded;
+    }
+
+    struct intersection_t
+    {
+        std::size_t side;
+        dvoronoi::data::point_t point;
+    };
+
+    intersection_t first_intersection(const auto& box, const auto& origin, const auto& direction) {
+        auto intersection = intersection_t{};
+
+        auto t = std::numeric_limits<dvoronoi::data::scalar_t>::infinity();
+
+        if (direction.x > 0.0) {
+            t = (box.right - origin.x) / direction.x;
+            intersection.side = box_side::Right;
+            intersection.point = origin + t * direction;
+        } else if (direction.x < 0.0) {
+            t = (box.left - origin.x) / direction.x;
+            intersection.side = box_side::Left;
+            intersection.point = origin + t * direction;
+        }
+
+        if (direction.y > 0.0) {
+            auto u = (box.top - origin.y) / direction.y;
+            if (u < t) {
+                intersection.side = box_side::Top;
+                intersection.point = origin + u * direction;
+            }
+        } else if (direction.y < 0.0) {
+            auto u = (box.bottom - origin.y) / direction.y;
+            if (u < t) {
+                intersection.side = box_side::Bottom;
+                intersection.point = origin + u * direction;
+            }
+        }
+
+        return intersection;
     }
 
     bool bound_edge(const auto& box, auto* left_arc, auto* right_arc, auto& linked_vertices, auto& vertices, auto& diag) {

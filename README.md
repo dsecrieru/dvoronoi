@@ -15,7 +15,8 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
 
 # Features
 - generates Voronoi diagrams using Fortune's sweep line algorithm
-- Delaunay triangulation can be obtained from Voronoi diagram
+- Delaunay triangulation can be obtained from the Voronoi diagram
+- convex hull of sites (using Andrew's monotone chain)
 - point parametrization: any point type can be plugged in
 - good numerical stability due to double precision being used internally
 

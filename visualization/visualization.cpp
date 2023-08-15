@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
-const dvoronoi::fortune::config_t config{ dvoronoi::box_t{-0.5, -0.5, width + 0.5, height + 0.5} };
+const dvoronoi::fortune::config_t config{ dvoronoi::box_t{0, 0, width, height} };
 const float edge = 100;
 const std::size_t SITES_COUNT = 200;
 
@@ -89,6 +89,7 @@ int main() {
 
     auto diagram = dvoronoi::fortune::generate(sites, config);
     diagram->generate_delaunay();
+    diagram->compute_convex_hull();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
 
@@ -143,6 +144,7 @@ int main() {
         if (add_sites || sub_sites) {
             diagram = dvoronoi::fortune::generate(sites, config);
             diagram->generate_delaunay();
+            diagram->compute_convex_hull();
 
             add_sites = sub_sites = false;
         }
@@ -156,10 +158,10 @@ int main() {
         for (const auto& p : sites)
             window.draw(get_shape(radius, p.x, p.y, site_col));
 
-        if (index > diagram->sites.size() - 1)
+        if (index > diagram->convex_hull->size() - 1)
             index = 0;
 
-        auto site = diagram->sites[index];
+        auto site = diagram->sites[(*diagram->convex_hull)[index]];
         auto face = site.face;
         window.draw(get_shape(radius, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
@@ -203,6 +205,7 @@ int main() {
 
             diagram = dvoronoi::fortune::generate(sites, config);
             diagram->generate_delaunay();
+            diagram->compute_convex_hull();
         }
 
         std::this_thread::sleep_for(10ms);
