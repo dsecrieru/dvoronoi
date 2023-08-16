@@ -39,6 +39,29 @@ namespace dvoronoi::data {
         site_t* site = nullptr;
         half_edge_t* half_edge = nullptr;
     };
+
+    static bool contains(const face_t& face, const point_t& p, bool closed_boundary = true) {
+        auto count = 0;
+        auto first = face.half_edge;
+        auto he = first;
+        do {
+            if ((he->orig->point.y <= p.y && he->dest->point.y > p.y) ||
+                (he->orig->point.y > p.y && he->dest->point.y <= p.y)) {
+
+                double vt = (p.y - he->orig->point.y) / (he->dest->point.y - he->orig->point.y);
+
+                if (p.x > he->orig->point.x + vt * (he->dest->point.x - he->orig->point.x)) {
+                    ++count;
+                } else if (p.x == he->orig->point.x + vt * (he->dest->point.x - he->orig->point.x)) {
+                    return closed_boundary;
+                }
+            }
+
+            he = he->next;
+        } while (he != first);
+
+        return count % 2 == 1;
+    }
 }
 
 #endif //EMERGENT_DATA_HPP
