@@ -42,8 +42,7 @@ namespace dvoronoi::data {
 
     static bool contains(const face_t& face, const point_t& p, bool closed_boundary = true) {
         auto count = 0;
-        auto first = face.half_edge;
-        auto he = first;
+        auto he = face.half_edge;
         do {
             if ((he->orig->point.y <= p.y && he->dest->point.y > p.y) ||
                 (he->orig->point.y > p.y && he->dest->point.y <= p.y)) {
@@ -58,7 +57,7 @@ namespace dvoronoi::data {
             }
 
             he = he->next;
-        } while (he != first);
+        } while (he != face.half_edge);
 
         return count % 2 == 1;
     }

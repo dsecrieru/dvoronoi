@@ -18,9 +18,7 @@
 #endif
 
 namespace dvoronoi {
-    template<typename point_t>
     struct diag_traits {
-        typedef point_t out_point_t;
         typedef data::scalar_t scalar_t;
         typedef data::site_t site_t;
         typedef data::face_t face_t;
@@ -30,6 +28,7 @@ namespace dvoronoi {
 }
 
 namespace dvoronoi::voronoi {
+
     template<typename diag_traits>
     class diagram_t {
     public:
@@ -157,8 +156,31 @@ namespace dvoronoi::voronoi {
 } // namespace dvoronoi::voronoi
 
 namespace dvoronoi {
-    template<typename point_t>
-    using voronoi_diagram_t = voronoi::diagram_t<diag_traits<point_t>>;
+    using voronoi_diagram_t = voronoi::diagram_t<diag_traits>;
+
+    auto compute_lloyd_relaxation(const auto& diag) -> std::vector<data::point_t> {
+        std::vector<data::point_t> sites{};
+
+        for (const auto& face : diag.faces) {
+            data::scalar_t area = 0.0;
+            data::point_t centroid{};
+
+            auto he = face.half_edge;
+            do {
+                auto det = he->orig->point.det(he->dest->point);
+                area += det;
+                centroid += (he->orig->point + he->dest->point) * det;
+
+                he = he->next;
+            } while (he != face.half_edge);
+
+            area *= 0.5;
+            centroid *= 1.0 / (6.0 * area);
+            sites.push_back(centroid);
+        }
+
+        return sites;
+    }
 }
 
 #endif //DVORONOI_COMMON_DIAGRAM_HPP
