@@ -31,6 +31,11 @@ namespace dvoronoi::util {
         return v1 > v2 + std::numeric_limits<T>::epsilon();
     }
 
+    template<typename point_t>
+    auto cross(const point_t& p1, const point_t& p2, const point_t& p3) {
+        return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
+    }
+
 } // namespace dvoronoi::util
 
 #endif //DVORONOI_UTIL_HPP

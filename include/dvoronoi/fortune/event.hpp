@@ -17,25 +17,23 @@ namespace dvoronoi::fortune::_details {
 
     template<typename diag_traits>
     struct event_t {
-        typedef _internal::point2_t point_t;
-        typedef diag_traits::scalar_t scalar_t;
         typedef diag_traits::site_t* site_h;
         typedef data::arc_t<diag_traits> arc_t;
 
         event_type type;
 
-        scalar_t x{};
-        scalar_t y{};
+        _internal::scalar_t x{};
+        _internal::scalar_t y{};
         std::size_t index{};
 
         site_h site = nullptr;
 
-        point_t convergence{};
+        _internal::point2_t convergence{};
         arc_t* arc = nullptr;
 
         explicit event_t(site_h site)
             : type(event_type::site), x(site->point.x), y(site->point.y), site(site) {}
-        explicit event_t(scalar_t y, const point_t& cp, arc_t* arc)
+        explicit event_t(_internal::scalar_t y, const _internal::point2_t& cp, arc_t* arc)
             : type(event_type::circle), x(cp.x), y(y), convergence(cp), arc(arc) {}
 
 //        bool operator<(const event_t& o) const {

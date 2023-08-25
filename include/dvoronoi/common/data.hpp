@@ -5,42 +5,46 @@
 #ifndef EMERGENT_DATA_HPP
 #define EMERGENT_DATA_HPP
 
-#include "point.hpp"
-
 namespace dvoronoi::data {
-    typedef _internal::scalar_t scalar_t;
-    typedef _internal::point2_t point_t;
 
+    template<typename point_t>
     struct face_t;
 
+    template<typename point_t>
     struct site_t {
         std::size_t index;
         point_t point{};
-        face_t* face = nullptr;
+        face_t<point_t>* face = nullptr;
 
-        explicit site_t(std::size_t i, scalar_t x, scalar_t y) : index(i), point(x, y) {}
+        explicit site_t(std::size_t i, auto x, auto y) : index(i), point{x, y} {}
     };
 
+    template<typename point_t>
     struct vertex_t {
         point_t point{};
+
+        vertex_t(auto x, auto y) : point{x, y} {}
     };
 
+    template<typename point_t>
     struct half_edge_t {
-        vertex_t* orig = nullptr;
-        vertex_t* dest = nullptr;
+        vertex_t<point_t>* orig = nullptr;
+        vertex_t<point_t>* dest = nullptr;
         half_edge_t* twin = nullptr;
-        face_t* face = nullptr;
+        face_t<point_t>* face = nullptr;
 
         half_edge_t* prev = nullptr;
         half_edge_t* next = nullptr;
     };
 
+    template<typename point_t>
     struct face_t {
-        site_t* site = nullptr;
-        half_edge_t* half_edge = nullptr;
+        site_t<point_t>* site = nullptr;
+        half_edge_t<point_t>* half_edge = nullptr;
     };
 
-    static bool contains(const face_t& face, const point_t& p, bool closed_boundary = true) {
+    template<typename point_t>
+    static bool contains(const face_t<point_t>& face, const point_t& p, bool closed_boundary = true) {
         auto count = 0;
         auto he = face.half_edge;
         do {

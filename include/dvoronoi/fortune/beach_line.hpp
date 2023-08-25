@@ -5,6 +5,7 @@
 #ifndef DVORONOI_BEACH_LINE_HPP
 #define DVORONOI_BEACH_LINE_HPP
 
+#include "dvoronoi/common/scalar.hpp"
 #include "dvoronoi/common/util.hpp"
 #include "arc_tree.hpp"
 #include "arc.hpp"
@@ -15,7 +16,7 @@ namespace dvoronoi::fortune::_details {
     class beach_line_t : private arc_tree_t<data::arc_t<diag_traits>> {
     public:
         typedef data::arc_t<diag_traits> arc_t;
-        typedef diag_traits::scalar_t scalar_t;
+        typedef _internal::scalar_t scalar_t;
         typedef diag_traits::site_t site_t;
 
         beach_line_t() : arc_tree_t<arc_t>() {}
@@ -108,7 +109,7 @@ namespace dvoronoi::fortune::_details {
 
     template<typename diag_traits>
     auto beach_line_t<diag_traits>::compute_breakpoint(const auto& p1, const auto& p2, auto sweep_y, typename arc_t::side_t side) const {
-        auto x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+        scalar_t x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
 
         if (util::eq(y1, y2)) {
             if (util::lt(x1, x2))

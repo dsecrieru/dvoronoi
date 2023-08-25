@@ -9,8 +9,11 @@
 #include <list>
 #include <cassert>
 
+#include "scalar.hpp"
 #include "data.hpp"
+#include "point.hpp"
 #include "box.hpp"
+#include "util.hpp"
 
 //#define DIAG_USE_PMR
 #ifdef DIAG_USE_PMR
@@ -18,24 +21,25 @@
 #endif
 
 namespace dvoronoi {
+    template<typename point_t>
     struct diag_traits {
-        typedef data::scalar_t scalar_t;
-        typedef data::site_t site_t;
-        typedef data::face_t face_t;
-        typedef data::vertex_t vertex_t;
-        typedef data::half_edge_t half_edge_t;
+        typedef point_t out_point_t;
+        typedef data::site_t<point_t> site_t;
+        typedef data::face_t<point_t> face_t;
+        typedef data::vertex_t<point_t> vertex_t;
+        typedef data::half_edge_t<point_t> half_edge_t;
     };
 }
 
 namespace dvoronoi::voronoi {
 
-    template<typename diag_traits>
+    template<typename point_t>
     class diagram_t {
     public:
-        typedef diag_traits::site_t site_t;
-        typedef diag_traits::face_t face_t;
-        typedef diag_traits::vertex_t vertex_t;
-        typedef diag_traits::half_edge_t half_edge_t;
+        typedef diag_traits<point_t>::site_t site_t;
+        typedef diag_traits<point_t>::face_t face_t;
+        typedef diag_traits<point_t>::vertex_t vertex_t;
+        typedef diag_traits<point_t>::half_edge_t half_edge_t;
         typedef std::vector<std::vector<std::size_t>> triangulation_t;
         typedef std::vector<std::size_t> convex_hull_t;
 
@@ -74,8 +78,8 @@ namespace dvoronoi::voronoi {
             half_edges.reserve(6 * n);
         }
 
-        vertex_t* create_vertex(const data::point_t& point) {
-            vertices.emplace_back(point);
+        vertex_t* create_vertex(const _internal::point2_t& p) {
+            vertices.emplace_back(p.x, p.y);
             //vertices.back().it = std::prev(vertices.end());
             return &vertices.back();
         }
@@ -139,12 +143,12 @@ namespace dvoronoi::voronoi {
             std::size_t k = 0;
 
             for (size_t i = 0; i < n; ++i) {
-                while (k >= 2 && sites[(*convex_hull)[k - 2]].point.cross(sites[(*convex_hull)[k - 1]].point, sorted[i].point) <= 0) --k;
+                while (k >= 2 && util::cross(sites[(*convex_hull)[k - 2]].point, sites[(*convex_hull)[k - 1]].point, sorted[i].point) <= 0) --k;
                 (*convex_hull)[k++] = sorted[i].index;
             }
 
             for (size_t i = n - 1, t = k + 1; i > 0; --i) {
-                while (k >= t && sites[(*convex_hull)[k - 2]].point.cross(sites[(*convex_hull)[k - 1]].point, sorted[i - 1].point) <= 0) --k;
+                while (k >= t && util::cross(sites[(*convex_hull)[k - 2]].point, sites[(*convex_hull)[k - 1]].point, sorted[i - 1].point) <= 0) --k;
                 (*convex_hull)[k++] = sorted[i - 1].index;
             }
 
@@ -156,14 +160,15 @@ namespace dvoronoi::voronoi {
 } // namespace dvoronoi::voronoi
 
 namespace dvoronoi {
-    using voronoi_diagram_t = voronoi::diagram_t<diag_traits>;
+    template<typename point_t>
+    using voronoi_diagram_t = voronoi::diagram_t<point_t>;
 
-    auto compute_lloyd_relaxation(const auto& diag) -> std::vector<data::point_t> {
-        std::vector<data::point_t> sites{};
+    auto compute_lloyd_relaxation(const auto& diag) -> std::vector<typename decltype(diag)::out_point_t> {
+        std::vector<typename decltype(diag)::out_point_t> sites{};
 
         for (const auto& face : diag.faces) {
-            data::scalar_t area = 0.0;
-            data::point_t centroid{};
+            _internal::scalar_t area = 0.0;
+            _internal::point2_t centroid{};
 
             auto he = face.half_edge;
             do {
@@ -176,7 +181,8 @@ namespace dvoronoi {
 
             area *= 0.5;
             centroid *= 1.0 / (6.0 * area);
-            sites.push_back(centroid);
+
+            sites.emplace_back(centroid.x, centroid.y);
         }
 
         return sites;

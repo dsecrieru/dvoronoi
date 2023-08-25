@@ -39,14 +39,12 @@ namespace dvoronoi::_internal {
         return lhs;
     }
 
-    template<typename T>
-    point2_t operator*(T scalar, point2_t p) {
+    static point2_t operator*(scalar_t scalar, point2_t p) {
         p *= scalar;
         return p;
     }
 
-    template<typename T>
-    point2_t operator*(point2_t p, T scalar) { return scalar * p; }
+    static point2_t operator*(point2_t p, scalar_t scalar) { return scalar * p; }
 }
 
 #endif //DVORONOI_POINT_HPP

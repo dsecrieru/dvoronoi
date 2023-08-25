@@ -23,8 +23,7 @@ namespace dvoronoi::fortune::_details {
         right->left_half_edge->twin = left->right_half_edge;
     }
 
-    template<typename point_t>
-    auto compute_convergence_point(const point_t& p1, const point_t& p2, const point_t& p3) -> std::optional<point_t> {
+    auto compute_convergence_point(const _internal::point2_t& p1, const _internal::point2_t& p2, const _internal::point2_t& p3) -> std::optional<_internal::point2_t> {
         auto v1 = (p1 - p2).ortho();
         auto v2 = (p2 - p3).ortho();
         auto delta = (p3 - p1) * 0.5;
@@ -39,11 +38,10 @@ namespace dvoronoi::fortune::_details {
         return center;
     }
 
-    template<typename event_t>
     void maybe_add_circle_event(auto* left, auto* middle, auto* right, auto sweep_y, auto& event_queue) {
-        const auto& p1 = left->site->point;
-        const auto& p2 = middle->site->point;
-        const auto& p3 = right->site->point;
+        _internal::point2_t p1{left->site->point.x, left->site->point.y};
+        _internal::point2_t p2{middle->site->point.x, middle->site->point.y};
+        _internal::point2_t p3{right->site->point.x, right->site->point.y};
 
         auto convergence_point = compute_convergence_point(p1, p2, p3);
 
@@ -100,9 +98,9 @@ namespace dvoronoi::fortune::_details {
         right_arc->left_half_edge = left_arc->right_half_edge;
 
         if (!beach_line.is_nil(left_arc->prev))
-            maybe_add_circle_event<event_t>(left_arc->prev, left_arc, middle_arc, event.y, event_queue);
+            maybe_add_circle_event(left_arc->prev, left_arc, middle_arc, event.y, event_queue);
         if (!beach_line.is_nil(right_arc->next))
-            maybe_add_circle_event<event_t>(middle_arc, right_arc, right_arc->next, event.y, event_queue);
+            maybe_add_circle_event(middle_arc, right_arc, right_arc->next, event.y, event_queue);
     }
 
     void remove_arc_and_update_diag(auto* arc, auto* vertex, auto& beach_line, auto& diagram) {
@@ -139,9 +137,9 @@ namespace dvoronoi::fortune::_details {
         remove_arc_and_update_diag(arc, vertex, beach_line, diagram);
 
         if (!beach_line.is_nil(left_arc->prev))
-            maybe_add_circle_event<event_t>(left_arc->prev, left_arc, right_arc, event.y, event_queue);
+            maybe_add_circle_event(left_arc->prev, left_arc, right_arc, event.y, event_queue);
         if (!beach_line.is_nil(right_arc->next))
-            maybe_add_circle_event<event_t>(left_arc, right_arc, right_arc->next, event.y, event_queue);
+            maybe_add_circle_event(left_arc, right_arc, right_arc->next, event.y, event_queue);
     }
 
     template<typename diag_traits>
@@ -188,7 +186,7 @@ namespace dvoronoi::fortune::_details {
         }
 
         if (config.bounding_box.has_value()) {
-            bound(diagram, config.bounding_box.value(), beach_line);
+            bound<typename diag_traits::out_point_t>(diagram, config.bounding_box.value(), beach_line);
         }
 
         // std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << std::endl;

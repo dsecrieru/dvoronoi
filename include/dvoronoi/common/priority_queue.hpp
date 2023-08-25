@@ -26,7 +26,7 @@ namespace dvoronoi {
         }
 
     public:
-        priority_queue_t() {}
+        priority_queue_t() = default;
         explicit priority_queue_t(std::size_t reserve_size) {
             _elements.reserve(reserve_size);
         }
