@@ -14,10 +14,11 @@ I wanted to try using Voronoi diagrams in a different project and decided to try
 Performance of my own implementation was worse than Pierre's, so I decided to fork his and see if there are any optimization opportunities left from there.
 
 # Features
-- generates Voronoi diagrams using Fortune's sweep line algorithm
+- generates Voronoi diagram using Fortune's sweep line algorithm
+- good numerical stability by using double precision internally
 - Delaunay triangulation can be obtained from the Voronoi diagram
 - convex hull of sites (using Andrew's monotone chain)
-- good numerical stability due to double precision being used internally
+- Lloyd relaxation
 
 # Structure
 |                 |                                                                                                          |
