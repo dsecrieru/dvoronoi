@@ -34,8 +34,10 @@ void bench(std::size_t sites_count) {
             sites.push_back({ distrib(rng) * (width - 1.0), distrib(rng) * (height - 1.0) });
         }
 
+        dvoronoi::fortune::config_t config{};
+
         const auto start = std::chrono::steady_clock::now();
-        auto diagram = dvoronoi::fortune::generate(sites, {});
+        auto diagram = dvoronoi::fortune::generate(sites, config);
         const auto end = std::chrono::steady_clock::now();
 
         auto run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

@@ -9,6 +9,7 @@
 #include <list>
 #include <cassert>
 
+#include "none.hpp"
 #include "data.hpp"
 #include "box.hpp"
 
@@ -18,12 +19,13 @@
 #endif
 
 namespace dvoronoi {
+    template<typename face_user_data, typename half_edge_user_data>
     struct diag_traits {
         typedef data::scalar_t scalar_t;
-        typedef data::site_t site_t;
-        typedef data::face_t face_t;
+        typedef data::site_t<face_user_data, half_edge_user_data> site_t;
+        typedef data::face_t<face_user_data, half_edge_user_data> face_t;
         typedef data::vertex_t vertex_t;
-        typedef data::half_edge_t half_edge_t;
+        typedef data::half_edge_t<face_user_data, half_edge_user_data> half_edge_t;
     };
 }
 
@@ -156,7 +158,8 @@ namespace dvoronoi::voronoi {
 } // namespace dvoronoi::voronoi
 
 namespace dvoronoi {
-    using voronoi_diagram_t = voronoi::diagram_t<diag_traits>;
+    template<typename face_user_data, typename half_edge_user_data>
+    using voronoi_diagram_t = voronoi::diagram_t<diag_traits<face_user_data, half_edge_user_data>>;
 
     auto compute_lloyd_relaxation(const auto& diag) -> std::vector<data::point_t> {
         std::vector<data::point_t> sites{};

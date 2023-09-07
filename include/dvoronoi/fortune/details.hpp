@@ -145,7 +145,7 @@ namespace dvoronoi::fortune::_details {
     }
 
     template<typename diag_traits>
-    void generate(const config_t& config, auto& diagram, auto& event_queue) {
+    void generate(const auto& config, auto& diagram, auto& event_queue) {
         assert (!event_queue.empty());
 
         beach_line_t<diag_traits> beach_line;
@@ -187,8 +187,11 @@ namespace dvoronoi::fortune::_details {
             }
         }
 
+        typedef typename std::remove_reference_t<decltype(config)>::face_user_data_t face_user_data_t;
+        typedef typename std::remove_reference_t<decltype(config)>::half_edge_user_data_t half_edge_user_data_t;
+
         if (config.bounding_box.has_value()) {
-            bound(diagram, config.bounding_box.value(), beach_line);
+            bound<face_user_data_t, half_edge_user_data_t>(diagram, config.bounding_box.value(), beach_line);
         }
 
         // std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << std::endl;

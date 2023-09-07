@@ -15,11 +15,16 @@
 namespace dvoronoi::fortune {
 
 template<typename point_t>
-auto generate(const std::vector<point_t>& sites, const config_t& config = config_t{}) {
-    typedef voronoi_diagram_t diag_t;
+auto generate(const std::vector<point_t>& sites, const auto& config = config_t{}) {
+    typedef typename std::remove_reference_t<decltype(config)>::face_user_data_t face_user_data_t;
+    typedef typename std::remove_reference_t<decltype(config)>::half_edge_user_data_t half_edge_user_data_t;
+
+    typedef voronoi_diagram_t<face_user_data_t, half_edge_user_data_t> diag_t;
     auto diagram = std::make_unique<diag_t>(sites.size());
     
-    priority_queue_t<_details::event_t<diag_traits>> event_queue(sites.size());
+    typedef diag_traits<face_user_data_t, half_edge_user_data_t> diag_traits_t;
+
+    priority_queue_t<_details::event_t<diag_traits_t>> event_queue(sites.size());
 
     for (std::size_t i = 0; i < sites.size(); ++i) {
         diagram->sites.emplace_back(i, sites[i].x, sites[i].y);
@@ -29,7 +34,7 @@ auto generate(const std::vector<point_t>& sites, const config_t& config = config
         event_queue.emplace(&diagram->sites.back());
     }
 
-    _details::generate<diag_traits>(config, *diagram, event_queue);
+    _details::generate<diag_traits_t>(config, *diagram, event_queue);
 
     return diagram;
 }

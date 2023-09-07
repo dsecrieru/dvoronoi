@@ -80,7 +80,7 @@ auto bench_mygal(std::size_t run) {
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
-auto bench_dvoronoi(std::size_t run) {
+auto bench_dvoronoi(std::size_t run, const auto& config) {
     typedef double scalar_t;
     typedef gen_point2d_t<scalar_t> point2d_t;
 
@@ -95,7 +95,7 @@ auto bench_dvoronoi(std::size_t run) {
     }
 
     const auto start = std::chrono::steady_clock::now();
-    auto diagram = dvoronoi::fortune::generate(sites, { dvoronoi::box_t{-0.5, -0.5, width + 0.5, height + 0.5} });
+    auto diagram = dvoronoi::fortune::generate(sites, config);
     const auto end = std::chrono::steady_clock::now();
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -108,6 +108,8 @@ int main() {
     std::vector<std::chrono::milliseconds> mygal_durations;
     std::vector<std::chrono::milliseconds> dvoronoi_durations;
 
+    dvoronoi::fortune::config_t config{ dvoronoi::box_t{-0.5, -0.5, width + 0.5, height + 0.5} };
+
     for (std::size_t r = 0; r < runs; ++r) {
 #ifdef JC_VORONOI_IMPLEMENTATION
         auto jcv = bench_jcv(r);
@@ -117,7 +119,7 @@ int main() {
         auto mygal = bench_mygal(r);
         mygal_durations.push_back(mygal);
 
-        auto dvoronoi = bench_dvoronoi(r);
+        auto dvoronoi = bench_dvoronoi(r, config);
         dvoronoi_durations.push_back(dvoronoi);
 
         std::cout

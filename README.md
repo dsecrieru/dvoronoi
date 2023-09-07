@@ -16,6 +16,7 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
 # Features
 - generates Voronoi diagram using Fortune's sweep line algorithm
 - good numerical stability by using double precision internally
+- optional user data for half edge and face structures
 - Delaunay triangulation can be obtained from the Voronoi diagram
 - convex hull of sites (using Andrew's monotone chain)
 - Lloyd relaxation
