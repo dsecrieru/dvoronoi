@@ -12,11 +12,7 @@
 
 namespace dvoronoi::fortune {
 
-    template<typename face_user_data = none, typename half_edge_user_data = none>
     struct config_t {
-        typedef face_user_data face_user_data_t;
-        typedef half_edge_user_data half_edge_user_data_t;
-
         std::optional<box_t> bounding_box{};
     };
 

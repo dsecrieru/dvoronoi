@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 
 const int width = 1280;
 const int height = 1024;
-const dvoronoi::fortune::config_t config{ dvoronoi::box_t{0, 0, width, height} };
+const dvoronoi::fortune::config_t config{ dvoronoi::box_t{ 0, 0, width, height } };
 const float edge = 100;
 const std::size_t SITES_COUNT = 200;
 
@@ -87,7 +87,8 @@ int main() {
     std::vector<point_t> move_vec;
     populate_or_append(sites, move_vec, SITES_COUNT);
 
-    auto diagram = dvoronoi::fortune::generate(sites, config);
+    dvoronoi::fortune::algorithm algo;
+    auto diagram = algo.generate(sites, config);
     diagram->generate_delaunay();
     diagram->compute_convex_hull();
 
@@ -142,7 +143,7 @@ int main() {
         }
 
         if (add_sites || sub_sites) {
-            diagram = dvoronoi::fortune::generate(sites, config);
+            diagram = algo.generate(sites, config);
             diagram->generate_delaunay();
             diagram->compute_convex_hull();
 
@@ -203,7 +204,7 @@ int main() {
                 }
             }
 
-            diagram = dvoronoi::fortune::generate(sites, config);
+            diagram = algo.generate(sites, config);
             diagram->generate_delaunay();
             diagram->compute_convex_hull();
         }

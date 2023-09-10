@@ -94,8 +94,10 @@ auto bench_dvoronoi(std::size_t run, const auto& config) {
         sites.emplace_back(distrib(rng) * (width - 1.0), distrib(rng) * (height - 1.0));
     }
 
+    dvoronoi::fortune::algorithm algo;
+
     const auto start = std::chrono::steady_clock::now();
-    auto diagram = dvoronoi::fortune::generate(sites, config);
+    auto diagram = algo.generate(sites, config);
     const auto end = std::chrono::steady_clock::now();
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -108,7 +110,7 @@ int main() {
     std::vector<std::chrono::milliseconds> mygal_durations;
     std::vector<std::chrono::milliseconds> dvoronoi_durations;
 
-    dvoronoi::fortune::config_t config{ dvoronoi::box_t{-0.5, -0.5, width + 0.5, height + 0.5} };
+    dvoronoi::fortune::config_t config{ dvoronoi::box_t{ -0.5, -0.5, width + 0.5, height + 0.5 } };
 
     for (std::size_t r = 0; r < runs; ++r) {
 #ifdef JC_VORONOI_IMPLEMENTATION

@@ -5,8 +5,6 @@
 #ifndef DVORONOI_DETAILS_HPP
 #define DVORONOI_DETAILS_HPP
 
-#include <cassert>
-
 #include "config.hpp"
 #include "event.hpp"
 #include "beach_line.hpp"
@@ -142,69 +140,6 @@ namespace dvoronoi::fortune::_details {
             maybe_add_circle_event<event_t>(left_arc->prev, left_arc, right_arc, event.y, event_queue);
         if (!beach_line.is_nil(right_arc->next))
             maybe_add_circle_event<event_t>(left_arc, right_arc, right_arc->next, event.y, event_queue);
-    }
-
-    template<typename diag_traits>
-    void generate(const auto& config, auto& diagram, auto& event_queue) {
-        assert (!event_queue.empty());
-
-        beach_line_t<diag_traits> beach_line;
-
-//#define MEM_PROFILING
-#ifdef MEM_PROFILING
-    auto event_sz = sizeof(_details::event_t<diag_traits>);
-    auto arc_sz = sizeof(typename beach_line_t<diag_traits>::arc_t);
-    auto vertex_sz = sizeof(typename diag_traits::vertex_t);
-    auto he_sz = sizeof(typename diag_traits::half_edge_t);
-    std::cout << "event sz:  " << event_sz << std::endl;
-    std::cout << "arc sz:    " << arc_sz << std::endl;
-    std::cout << "vertex sz: " << vertex_sz << std::endl;
-    std::cout << "he sz:     " << he_sz << std::endl;
-#endif
-
-        {
-            auto first_site_event = event_queue.pop();
-            beach_line.set_root(first_site_event->site);
-        }
-
-#ifdef MEM_PROFILING
-        int circle_events = 0;
-        std::size_t max_events = 0;
-#endif
-        while (!event_queue.empty()) {
-#ifdef MEM_PROFILING
-            max_events = std::max(max_events, event_queue.size());
-#endif
-            auto event = event_queue.pop();
-
-            if (event->type == event_type::site) {
-                handle_site_event(*event, beach_line, diagram, event_queue);
-            } else {
-                handle_circle_event(*event, beach_line, diagram, event_queue);
-#ifdef MEM_PROFILING
-                ++circle_events;
-#endif                
-            }
-        }
-
-        typedef typename std::remove_reference_t<decltype(config)>::face_user_data_t face_user_data_t;
-        typedef typename std::remove_reference_t<decltype(config)>::half_edge_user_data_t half_edge_user_data_t;
-
-        if (config.bounding_box.has_value()) {
-            bound<face_user_data_t, half_edge_user_data_t>(diagram, config.bounding_box.value(), beach_line);
-        }
-
-        // std::cout << "vertices:      " << std::setw(10) << diagram.vertices.size() << std::endl;
-        // std::cout << "half edges:    " << std::setw(10) << diagram.half_edges.size() << std::endl;
-
-#ifdef MEM_PROFILING
-        std::cout << "------------------------" << std::endl;
-
-        std::cout << "max events:    " << std::setw(10) << max_events << std::endl;
-
-        int circle_events_diff = (2 * diagram.sites.size() - 4) - circle_events;
-        std::cout << "circle events: " << std::setw(10) << circle_events << "\t" << circle_events_diff << std::endl;
-#endif
     }
 
 } // namespace dvoronoi::fortune::_details
