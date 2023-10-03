@@ -97,12 +97,11 @@ int main() {
     auto diagram = dvoronoi::fortune::generate(sites, config);
     dvoronoi::voronoi::intersect(*diagram, intersect_box);
     diagram->generate_delaunay();
-    diagram->compute_convex_hull();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
 
     bool is_paused = true;
-    bool do_draw_triang = false;
+    bool do_draw_triang = true;
     bool do_draw_voronoi = true;
     bool add_sites = false;
     bool sub_sites = false;
@@ -153,7 +152,6 @@ int main() {
             diagram = dvoronoi::fortune::generate(sites, config);
             dvoronoi::voronoi::intersect(*diagram, intersect_box);
             diagram->generate_delaunay();
-            diagram->compute_convex_hull();
 
             add_sites = sub_sites = false;
         }
@@ -179,11 +177,9 @@ int main() {
 //        };
 //        window.draw(box_lines.data(), 8, sf::Lines);
 
-//        if (index > diagram->convex_hull->size() - 1)
-//            index = 0;
-            index = std::min(index, diagram->sites.size() - 1);
+        if (index > diagram->sites.size() - 1)
+            index = 0;
 
-//        auto site = diagram->sites[(*diagram->convex_hull)[index]];
         auto site = diagram->sites[index];
         auto face = site.face;
         window.draw(get_shape(radius, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
@@ -229,7 +225,6 @@ int main() {
             diagram = dvoronoi::fortune::generate(sites, config);
             dvoronoi::voronoi::intersect(*diagram, intersect_box);
             diagram->generate_delaunay();
-            diagram->compute_convex_hull();
         }
 
         std::this_thread::sleep_for(10ms);
