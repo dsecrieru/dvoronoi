@@ -8,6 +8,7 @@
 #include <vector>
 #include <list>
 #include <cassert>
+#include <algorithm>
 
 #include "data.hpp"
 #include "box.hpp"
