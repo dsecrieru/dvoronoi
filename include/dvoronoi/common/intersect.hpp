@@ -6,7 +6,10 @@
 #define DVORONOI_INTERSECT_HPP
 
 #include <unordered_set>
+#include <unordered_map>
 #include <array>
+#include <stdexcept>
+#include <ranges>
 
 #include "dvoronoi/common/diagram.hpp"
 
@@ -67,7 +70,7 @@ namespace dvoronoi::voronoi {
                 if (!inside && !next_inside) {
                     if (intersections_count == 0) {
                         removed_vertices.emplace(half_edge->orig->index);
-                        half_edge->in_use = false;
+                        half_edge->next = nullptr;
                         removed_half_edges.emplace(half_edge->index);
                     } else if (intersections_count == 2) {
                         removed_vertices.emplace(half_edge->orig->index);
@@ -166,8 +169,8 @@ namespace dvoronoi::voronoi {
 
         auto swapped_half_edges = std::unordered_map<std::size_t, std::size_t>{};
 
-        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](data::half_edge_t*& half_edge) {
-            if (half_edge->index < diag.half_edges.size())
+        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](data::half_edge_t*& half_edge, auto& is_invalid) {
+            if (is_invalid(half_edge))
                 return;
 
             const auto& swapped_iter = swapped_half_edges.find(half_edge->index);
@@ -187,6 +190,7 @@ namespace dvoronoi::voronoi {
             diag.half_edges[available] = *half_edge;
             diag.half_edges[available].index = available;
 
+            half_edge->next = nullptr;
             half_edge = &diag.half_edges[available];
         };
 
@@ -198,14 +202,64 @@ namespace dvoronoi::voronoi {
             maybe_swap_vertex(he.orig);
             maybe_swap_vertex(he.dest);
         }
+
+        auto index_from_existing_invalid = [max_index = diag.half_edges.size()](const auto* half_edge) {
+            return !half_edge || half_edge->index < max_index;
+        };
+
         for (auto& he : new_half_edges) {
-            maybe_swap_half_edge(he.next);
-            maybe_swap_half_edge(he.prev);
+            maybe_swap_half_edge(he.next, index_from_existing_invalid);
+            maybe_swap_half_edge(he.prev, index_from_existing_invalid);
         }
         for (auto& he : diag.half_edges) {
-            maybe_swap_half_edge(he.next);
-            maybe_swap_half_edge(he.prev);
+            maybe_swap_half_edge(he.next, index_from_existing_invalid);
+            maybe_swap_half_edge(he.prev, index_from_existing_invalid);
         }
+
+        if (removed_half_edges.empty())
+            return success;
+
+        swapped_half_edges.clear();
+        auto to_be_removed_count = removed_half_edges.size();
+
+        auto all_indices_valid = [](const auto* half_edge) {
+            return !half_edge;
+        };
+
+        auto reverse_he_view = diag.half_edges | std::views::reverse;
+
+        while (!removed_half_edges.empty()) {
+            auto to_be_swapped = std::optional<std::size_t>{};
+            for (auto& candidate : reverse_he_view) {
+                if (!candidate.next) {
+                    removed_half_edges.erase(candidate.index);
+                    continue;
+                }
+
+                to_be_swapped = candidate.index;
+                break;
+            }
+
+            if (!to_be_swapped.has_value())
+                throw std::runtime_error("a suitable candidate to swap was not found");
+            if (removed_half_edges.empty())
+                break;
+
+            for (auto& he : diag.half_edges) {
+                if (!he.next)
+                    continue;
+
+                if (he.next->index == to_be_swapped.value())
+                    maybe_swap_half_edge(he.next, all_indices_valid);
+
+                if (removed_half_edges.empty())
+                    break;
+
+                if (he.prev->index == to_be_swapped.value())
+                    maybe_swap_half_edge(he.prev, all_indices_valid);
+            }
+        }
+        diag.half_edges.resize(diag.half_edges.size() - to_be_removed_count);
 
         return success;
     }

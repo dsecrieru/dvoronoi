@@ -55,7 +55,7 @@ sf::CircleShape get_shape(scalar_t r, scalar_t x, scalar_t y, const sf::Color fi
 
 void draw_voronoi(sf::RenderWindow& window, const auto& diagram) {
     for (const auto& he : diagram.half_edges) {
-        if (!he.in_use || !he.orig || !he.dest)
+        if (!he.orig || !he.dest)
             continue;
 
         std::array<sf::Vertex, 2> line = {

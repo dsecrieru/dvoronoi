@@ -35,8 +35,6 @@ namespace dvoronoi::data {
 
         half_edge_t* prev = nullptr;
         half_edge_t* next = nullptr;
-
-        bool in_use = true;
     };
 
     struct face_t {
