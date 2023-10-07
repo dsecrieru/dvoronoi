@@ -5,6 +5,8 @@
 #ifndef DVORONOI_BOX_HPP
 #define DVORONOI_BOX_HPP
 
+#include <array>
+
 #include "scalar.hpp"
 #include "point.hpp"
 #include "util.hpp"
