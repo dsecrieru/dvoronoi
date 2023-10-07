@@ -8,6 +8,7 @@
 #include <vector>
 #include <list>
 #include <cassert>
+#include <algorithm>
 
 #include "data.hpp"
 #include "box.hpp"
@@ -75,30 +76,38 @@ namespace dvoronoi::voronoi {
         }
 
         vertex_t* create_vertex(const data::point_t& point) {
-            vertices.emplace_back(point);
-            //vertices.back().it = std::prev(vertices.end());
-            return &vertices.back();
+            return create_vertex(point, vertices, vertices.size());
+        }
+        vertex_t* create_vertex(const data::point_t& point, auto& storage, auto index) {
+            storage.emplace_back(index, point);
+            return &storage.back();
         }
 
         half_edge_t* create_half_edge(face_t* face) {
-            half_edges.emplace_back();
-            half_edges.back().face = face;
-            //half_edges.back().it = std::prev(half_edges.end());
+            return create_half_edge(face, half_edges, half_edges.size());
+        }
+        half_edge_t* create_half_edge(face_t* face, auto& storage, auto index) {
+            storage.emplace_back();
+            storage.back().index = index;
+            storage.back().face = face;
             if (face->half_edge == nullptr)
-                face->half_edge = &half_edges.back();
-            return &half_edges.back();
+                face->half_edge = &storage.back();
+            return &storage.back();
         }
 
         vertex_t* create_corner(const box_t& box, std::size_t side) {
+            return create_corner(box, side, vertices, vertices.size());
+        }
+        vertex_t* create_corner(const box_t& box, std::size_t side, auto& storage, auto index) {
             switch (side) {
                 case box_side::Left:
-                    return create_vertex({ box.left, box.top });
+                    return create_vertex({ box.left, box.top }, storage, index);
                 case box_side::Bottom:
-                    return create_vertex({ box.left, box.bottom });
+                    return create_vertex({ box.left, box.bottom }, storage, index);
                 case box_side::Right:
-                    return create_vertex({ box.right, box.bottom });
+                    return create_vertex({ box.right, box.bottom }, storage, index);
                 case box_side::Top:
-                    return create_vertex({ box.right, box.top });
+                    return create_vertex({ box.right, box.top }, storage, index);
                 default:
                     return nullptr;
             }

@@ -18,6 +18,7 @@ add_library(dvoronoi INTERFACE
         include/dvoronoi/common/diagram.hpp
         include/dvoronoi/common/box.hpp
         include/dvoronoi/common/priority_queue.hpp
+        include/dvoronoi/common/intersect.hpp
         include/dvoronoi/fortune/config.hpp
         include/dvoronoi/fortune/algorithm.hpp
         include/dvoronoi/fortune/beach_line.hpp

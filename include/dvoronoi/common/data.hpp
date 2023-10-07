@@ -22,10 +22,12 @@ namespace dvoronoi::data {
     };
 
     struct vertex_t {
+        std::size_t index;
         point_t point{};
     };
 
     struct half_edge_t {
+        std::size_t index;
         vertex_t* orig = nullptr;
         vertex_t* dest = nullptr;
         half_edge_t* twin = nullptr;
