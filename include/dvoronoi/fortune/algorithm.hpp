@@ -11,6 +11,7 @@
 
 #include "dvoronoi/common/diagram.hpp"
 #include "dvoronoi/common/priority_queue.hpp"
+#include "dvoronoi/common/intersect.hpp"
 #include "details.hpp"
 
 namespace dvoronoi::fortune {
@@ -22,7 +23,7 @@ public:
     typedef half_edge_user_data half_edge_user_data_t;
     typedef voronoi_diagram_t<face_user_data_t, half_edge_user_data_t> diagram_t;
 
-    auto generate(const auto& sites, const config_t& config = config_t{}) {
+    static auto generate(const auto& sites, const config_t& config = config_t{}) {
         assert(!sites.empty());
 
         auto diagram = std::make_unique<diagram_t>(sites.size());
@@ -58,6 +59,8 @@ public:
 
         return diagram;
     }
+
+    static bool intersect(auto& diag, const box_t& box) { return voronoi::intersect<face_user_data_t, half_edge_user_data_t>(diag, box); }
 
 private:
     typedef diag_traits<face_user_data_t, half_edge_user_data_t> diag_traits_t;

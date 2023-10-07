@@ -24,11 +24,13 @@ namespace dvoronoi::data {
     };
 
     struct vertex_t {
+        std::size_t index;
         point_t point{};
     };
 
     template<typename face_user_data, typename half_edge_user_data>
     struct half_edge_t {
+        std::size_t index;
         vertex_t* orig = nullptr;
         vertex_t* dest = nullptr;
         half_edge_t* twin = nullptr;
@@ -42,6 +44,7 @@ namespace dvoronoi::data {
 
     template<typename face_user_data>
     struct half_edge_t<face_user_data, none> {
+        std::size_t index;
         vertex_t* orig = nullptr;
         vertex_t* dest = nullptr;
         half_edge_t* twin = nullptr;

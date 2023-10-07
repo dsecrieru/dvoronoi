@@ -53,7 +53,7 @@ sf::CircleShape get_shape(scalar_t r, scalar_t x, scalar_t y, const sf::Color fi
 }
 
 void draw_voronoi(sf::RenderWindow& window, const auto& diagram) {
-    for (const auto he : diagram.half_edges) {
+    for (const auto& he : diagram.half_edges) {
         if (!he.orig || !he.dest)
             continue;
 
@@ -87,10 +87,16 @@ int main() {
     std::vector<point_t> move_vec;
     populate_or_append(sites, move_vec, SITES_COUNT);
 
-    dvoronoi::fortune::algorithm algo;
-    auto diagram = algo.generate(sites, config);
+    auto intersect_box = config.bounding_box.value();
+    intersect_box.top -= edge;
+    intersect_box.bottom += edge;
+    intersect_box.left += edge;
+    intersect_box.right -= edge;
+
+    using algo = dvoronoi::fortune::algorithm<>;
+    auto diagram = algo::generate(sites, config);
+    algo::intersect(*diagram, intersect_box);
     diagram->generate_delaunay();
-    diagram->compute_convex_hull();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
 
@@ -143,9 +149,9 @@ int main() {
         }
 
         if (add_sites || sub_sites) {
-            diagram = algo.generate(sites, config);
+            diagram = algo::generate(sites, config);
+            algo::intersect(*diagram, intersect_box);
             diagram->generate_delaunay();
-            diagram->compute_convex_hull();
 
             add_sites = sub_sites = false;
         }
@@ -159,33 +165,45 @@ int main() {
         for (const auto& p : sites)
             window.draw(get_shape(radius, p.x, p.y, site_col));
 
-        if (index > diagram->convex_hull->size() - 1)
+//        std::array<sf::Vertex, 8> box_lines = {
+//                sf::Vertex({ static_cast<float>(intersect_box.left), static_cast<float>(intersect_box.bottom) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.right), static_cast<float>(intersect_box.bottom) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.right), static_cast<float>(intersect_box.bottom) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.right), static_cast<float>(intersect_box.top) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.right), static_cast<float>(intersect_box.top) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.left), static_cast<float>(intersect_box.top) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.left), static_cast<float>(intersect_box.top) }, sf::Color::Magenta),
+//                sf::Vertex({ static_cast<float>(intersect_box.left), static_cast<float>(intersect_box.bottom) }, sf::Color::Magenta)
+//        };
+//        window.draw(box_lines.data(), 8, sf::Lines);
+
+        if (index > diagram->sites.size() - 1)
             index = 0;
 
-        auto site = diagram->sites[(*diagram->convex_hull)[index]];
+        auto site = diagram->sites[index];
         auto face = site.face;
         window.draw(get_shape(radius, static_cast<scalar_t>(site.point.x), static_cast<scalar_t>(site.point.y), sf::Color::Red));
 
-         auto first_he = face->half_edge;
-         auto he = first_he;
-         bool missing_ends = false;
-         bool missing_he = false;
-         do {
-             if (!he->orig || !he->dest) {
-                 missing_ends = true;
-                 he = he->next;
-                 continue;
-             }
+        auto first_he = face->half_edge;
+        auto he = first_he;
+        bool missing_ends = false;
+        bool missing_he = false;
+        do {
+            if (!he->orig || !he->dest) {
+                missing_ends = true;
+                he = he->next;
+                continue;
+            }
 
-             std::array<sf::Vertex, 2> line = {
-                 sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
-                 sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
-             };
-             window.draw(line.data(), 2, sf::Lines);
-             he = he->next;
-             if (!he)
-                 missing_he = true;
-         } while (he && he != first_he);
+            std::array<sf::Vertex, 2> line = {
+                sf::Vertex({ static_cast<scalar_t>(he->orig->point.x), static_cast<scalar_t>(he->orig->point.y) }, sf::Color::Red),
+                sf::Vertex({ static_cast<scalar_t>(he->dest->point.x), static_cast<scalar_t>(he->dest->point.y) }, sf::Color::Red)
+            };
+            window.draw(line.data(), 2, sf::Lines);
+            he = he->next;
+            if (!he)
+                missing_he = true;
+        } while (he && he != first_he);
 
         window.display();
 
@@ -204,9 +222,9 @@ int main() {
                 }
             }
 
-            diagram = algo.generate(sites, config);
+            diagram = algo::generate(sites, config);
+            algo::intersect(*diagram, intersect_box);
             diagram->generate_delaunay();
-            diagram->compute_convex_hull();
         }
 
         std::this_thread::sleep_for(10ms);
