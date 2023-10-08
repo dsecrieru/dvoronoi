@@ -8,8 +8,6 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <array>
-#include <stdexcept>
-#include <ranges>
 
 #include "dvoronoi/common/diagram.hpp"
 
@@ -155,8 +153,7 @@ namespace dvoronoi::voronoi {
                 return;
             }
 
-            if (removed_vertices.empty())
-                throw std::runtime_error("ran out of available vertices");
+            assert (!removed_vertices.empty());
 
             auto available = *removed_vertices.begin();
             removed_vertices.erase(removed_vertices.begin());
@@ -169,7 +166,7 @@ namespace dvoronoi::voronoi {
 
         auto swapped_half_edges = std::unordered_map<std::size_t, std::size_t>{};
 
-        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](data::half_edge_t*& half_edge, auto& is_invalid) {
+        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](data::half_edge_t*& half_edge, const auto& is_invalid) {
             if (is_invalid(half_edge))
                 return;
 
@@ -180,18 +177,23 @@ namespace dvoronoi::voronoi {
             }
 
             if (removed_half_edges.empty())
-                throw std::runtime_error("ran out of available half edges");
+                return;
 
             auto available = *removed_half_edges.begin();
             removed_half_edges.erase(removed_half_edges.begin());
 
             swapped_half_edges[half_edge->index] = available;
 
-            diag.half_edges[available] = *half_edge;
-            diag.half_edges[available].index = available;
+            auto& available_he = diag.half_edges[available];
+
+            available_he = *half_edge;
+            available_he.index = available;
+
+            if (half_edge->face->half_edge->index == half_edge->index)
+                half_edge->face->half_edge = &available_he;
 
             half_edge->next = nullptr;
-            half_edge = &diag.half_edges[available];
+            half_edge = &available_he;
         };
 
         for (const auto& he : processed_half_edges) {
@@ -226,24 +228,25 @@ namespace dvoronoi::voronoi {
             return !half_edge;
         };
 
-        auto reverse_he_view = diag.half_edges | std::views::reverse;
-
-        while (!removed_half_edges.empty()) {
+        while (true) {
             auto to_be_swapped = std::optional<std::size_t>{};
-            for (auto& candidate : reverse_he_view) {
-                if (!candidate.next) {
-                    removed_half_edges.erase(candidate.index);
+
+            auto he_iter = diag.half_edges.rbegin();
+            while (he_iter != diag.half_edges.rend()) {
+                if (!he_iter->next) {
+                    removed_half_edges.erase(he_iter->index);
+                    diag.half_edges.pop_back();
+                    he_iter = diag.half_edges.rbegin();
                     continue;
                 }
 
-                to_be_swapped = candidate.index;
+                to_be_swapped = he_iter->index;
                 break;
             }
 
-            if (!to_be_swapped.has_value())
-                throw std::runtime_error("a suitable candidate to swap was not found");
             if (removed_half_edges.empty())
                 break;
+            assert (to_be_swapped.has_value());
 
             for (auto& he : diag.half_edges) {
                 if (!he.next)
@@ -252,14 +255,10 @@ namespace dvoronoi::voronoi {
                 if (he.next->index == to_be_swapped.value())
                     maybe_swap_half_edge(he.next, all_indices_valid);
 
-                if (removed_half_edges.empty())
-                    break;
-
                 if (he.prev->index == to_be_swapped.value())
                     maybe_swap_half_edge(he.prev, all_indices_valid);
             }
         }
-        diag.half_edges.resize(diag.half_edges.size() - to_be_removed_count);
 
         return success;
     }
