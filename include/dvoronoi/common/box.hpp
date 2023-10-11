@@ -46,7 +46,7 @@ namespace dvoronoi {
             // Left
             if (lt(orig.x, left) || lt(dest.x, left)) {
                 t[i] = (left - orig.x) / direction.x;
-                if (between(t[i], 0.0, 1.0)) {
+                if (between_eq(t[i], 0.0, 1.0)) {
                     intersections[i].side = box_side::Left;
                     intersections[i].point = orig + t[i] * direction;
                     // Check that the intersection is inside the box
@@ -58,7 +58,7 @@ namespace dvoronoi {
             // Right
             if (gt(orig.x, right) || gt(dest.x, right)) {
                 t[i] = (right - orig.x) / direction.x;
-                if (between(t[i], 0.0, 1.0)) {
+                if (between_eq(t[i], 0.0, 1.0)) {
                     intersections[i].side = box_side::Right;
                     intersections[i].point = orig + t[i] * direction;
                     // Check that the intersection is inside the box
@@ -70,7 +70,7 @@ namespace dvoronoi {
             // Bottom
             if (i < 2 && (lt(orig.y, bottom) || lt(dest.y, bottom))) {
                 t[i] = (bottom - orig.y) / direction.y;
-                if (between(t[i], 0.0, 1.0)) {
+                if (between_eq(t[i], 0.0, 1.0)) {
                     intersections[i].side = box_side::Bottom;
                     intersections[i].point = orig + t[i] * direction;
                     // Check that the intersection is inside the box
@@ -82,7 +82,7 @@ namespace dvoronoi {
             // Top
             if (i < 2 && (gt(orig.y, top) || gt(dest.y, top))) {
                 t[i] = (top - orig.y) / direction.y;
-                if (between(t[i], 0.0, 1.0)) {
+                if (between_eq(t[i], 0.0, 1.0)) {
                     intersections[i].side = box_side::Top;
                     intersections[i].point = orig + t[i] * direction;
                     // Check that the intersection is inside the box

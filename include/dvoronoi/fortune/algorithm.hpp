@@ -11,7 +11,7 @@
 
 #include "dvoronoi/common/diagram.hpp"
 #include "dvoronoi/common/priority_queue.hpp"
-#include "dvoronoi/common/intersect.hpp"
+#include "dvoronoi/common/clipping.hpp"
 #include "details.hpp"
 
 namespace dvoronoi::fortune {
@@ -60,7 +60,7 @@ public:
         return diagram;
     }
 
-    static bool intersect(auto& diag, const box_t& box) { return voronoi::intersect<face_user_data_t, half_edge_user_data_t>(diag, box); }
+    static bool clip(auto& diag, const box_t& box) { return voronoi::clip<face_user_data_t, half_edge_user_data_t>(diag, box); }
 
 private:
     typedef diag_traits<face_user_data_t, half_edge_user_data_t> diag_traits_t;

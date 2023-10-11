@@ -2,8 +2,8 @@
 // Created by Daniel Secrieru on 28/09/2023.
 //
 
-#ifndef DVORONOI_INTERSECT_HPP
-#define DVORONOI_INTERSECT_HPP
+#ifndef DVORONOI_CLIPPING_HPP
+#define DVORONOI_CLIPPING_HPP
 
 #include <unordered_set>
 #include <unordered_map>
@@ -14,7 +14,7 @@
 namespace dvoronoi::voronoi {
 
     template<typename face_user_data, typename half_edge_user_data>
-    bool intersect(auto& diag, const box_t& box) {
+    bool clip(auto& diag, const box_t& box) {
         using half_edge_t = data::half_edge_t<face_user_data, half_edge_user_data>;
 
         bool success = true;
@@ -156,14 +156,21 @@ namespace dvoronoi::voronoi {
                 return;
             }
 
-            assert (!removed_vertices.empty());
+            if (removed_vertices.empty())
+                assert (diag.vertices.size() < diag.vertices.capacity());
 
-            auto available = *removed_vertices.begin();
-            removed_vertices.erase(removed_vertices.begin());
+            std::size_t available;
+            if (!removed_vertices.empty()) {
+                available = *removed_vertices.begin();
+                removed_vertices.erase(removed_vertices.begin());
+
+                diag.vertices[available].point = vertex->point;
+            }
+            else
+                available = diag.create_vertex(vertex->point)->index;
 
             swapped_vertices[vertex->index] = available;
 
-            diag.vertices[available].point = vertex->point;
             vertex = &diag.vertices[available];
         };
 
@@ -267,4 +274,4 @@ namespace dvoronoi::voronoi {
 
 }
 
-#endif //DVORONOI_INTERSECT_HPP
+#endif //DVORONOI_CLIPPING_HPP

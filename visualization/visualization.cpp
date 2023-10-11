@@ -95,7 +95,7 @@ int main() {
 
     using algo = dvoronoi::fortune::algorithm<>;
     auto diagram = algo::generate(sites, config);
-    algo::intersect(*diagram, intersect_box);
+    algo::clip(*diagram, intersect_box);
     diagram->generate_delaunay();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
@@ -150,7 +150,7 @@ int main() {
 
         if (add_sites || sub_sites) {
             diagram = algo::generate(sites, config);
-            algo::intersect(*diagram, intersect_box);
+            algo::clip(*diagram, intersect_box);
             diagram->generate_delaunay();
 
             add_sites = sub_sites = false;
@@ -223,7 +223,7 @@ int main() {
             }
 
             diagram = algo::generate(sites, config);
-            algo::intersect(*diagram, intersect_box);
+            algo::clip(*diagram, intersect_box);
             diagram->generate_delaunay();
         }
 
