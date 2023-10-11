@@ -7,12 +7,15 @@
 
 #include <optional>
 
+#include "dvoronoi/common/none.hpp"
 #include "dvoronoi/common/box.hpp"
 
 namespace dvoronoi::fortune {
+
     struct config_t {
         std::optional<box_t> bounding_box{};
     };
+
 }
 
 #endif //DVORONOI_CONFIG_HPP

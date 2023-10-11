@@ -12,15 +12,19 @@
 
 namespace dvoronoi::fortune::_details {
 
+    template<typename face_user_data, typename half_edge_user_data>
     struct linked_vertex_t {
-        dvoronoi::data::half_edge_t* prev_half_edge = nullptr;
+        dvoronoi::data::half_edge_t<face_user_data, half_edge_user_data>* prev_half_edge = nullptr;
         dvoronoi::data::vertex_t* vertex = nullptr;
-        dvoronoi::data::half_edge_t* next_half_edge = nullptr;
+        dvoronoi::data::half_edge_t<face_user_data, half_edge_user_data>* next_half_edge = nullptr;
     };
 
-    typedef std::list<linked_vertex_t> linked_vertices_t;
-    typedef std::unordered_map<std::size_t, std::array<linked_vertex_t*, 8>> vertices_t;
+    template<typename face_user_data, typename half_edge_user_data>
+    using linked_vertices_t = std::list<linked_vertex_t<face_user_data, half_edge_user_data>>;
+    template<typename face_user_data, typename half_edge_user_data>
+    using vertices_t = std::unordered_map<std::size_t, std::array<linked_vertex_t<face_user_data, half_edge_user_data>*, 8>> ;
 
+    template<typename face_user_data, typename half_edge_user_data>
     bool bound(auto& diag, box_t box, auto& beach_line) {
         bool all_bounded = true;
 
@@ -31,8 +35,8 @@ namespace dvoronoi::fortune::_details {
             box.top = std::max(vertex.point.y, box.top);
         }
 
-        linked_vertices_t linked_vertices;
-        vertices_t vertices;
+        linked_vertices_t<face_user_data, half_edge_user_data> linked_vertices;
+        vertices_t<face_user_data, half_edge_user_data> vertices;
 
         if (!beach_line.empty()) {
             auto arc = beach_line.leftmost_arc();
@@ -115,7 +119,8 @@ namespace dvoronoi::fortune::_details {
         return success;
     }
 
-    bool add_corners(const auto& box, linked_vertices_t& linked_vertices, std::array<linked_vertex_t*, 8>& cell_vertices, auto& diag) {
+    template<typename face_user_data, typename half_edge_user_data>
+    bool add_corners(const auto& box, linked_vertices_t<face_user_data, half_edge_user_data>& linked_vertices, std::array<linked_vertex_t<face_user_data, half_edge_user_data>*, 8>& cell_vertices, auto& diag) {
         auto success = true;
 
         for (std::size_t i = 0; i < 5; ++i) {
@@ -146,7 +151,8 @@ namespace dvoronoi::fortune::_details {
         return success;
     }
 
-    void join_half_edges(std::size_t i, const std::array<linked_vertex_t*, 8>& cell_vertices, auto& diag) {
+    template<typename face_user_data, typename half_edge_user_data>
+    void join_half_edges(std::size_t i, const std::array<linked_vertex_t<face_user_data, half_edge_user_data>*, 8>& cell_vertices, auto& diag) {
         for (std::size_t side = 0; side < 4; ++side) {
             if (cell_vertices[2 * side] == nullptr)
                 continue;

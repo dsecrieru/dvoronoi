@@ -16,8 +16,9 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
 # Features
 - generates Voronoi diagram using Fortune's sweep line algorithm
 - good numerical stability by using double precision internally
-- Delaunay's triangulation can be obtained from the Voronoi diagram
+- optional user data for half edge and face structures
 - intersection with a box
+- Delaunay's triangulation can be obtained from the Voronoi diagram
 - convex hull of sites (using Andrew's monotone chain)
 - Lloyd relaxation
 
@@ -32,6 +33,6 @@ Performance of my own implementation was worse than Pierre's, so I decided to fo
  
 # Performance
 On my AMD Ryzen 9 5900X 4.2GHz with 64GB of RAM, Windows 10 with MSVC, it computes the Voronoi diagram for 100K random points (including bounding) in about 220ms, which is (not surprisingly) similar to *MyGAL*'s performance.
-After playing around with pmr and custom allocators, I found a few optimization opportunities, that brought the performance gain over *MyGAL* to about 10% on linux and 22% on Windows. Using custom allocators did not seem to bring much on linux, and a relatively small improvement on Windows (about 4%), so I decided to leave them disabled.
+After playing around with pmr and custom allocators, I found a few optimization opportunities, that brought the performance gain over *MyGAL* to about 10% on linux and 21% on Windows. Using custom allocators did not seem to bring much on linux, and a relatively small improvement on Windows (about 4%), so I decided to leave them disabled.
 
 I've also compared to Mathias Westerdahl's *jcv* implementation in C (https://github.com/JCash/voronoi). Unfortunately, it was not stable for 100K points, unless switched to using double precision. In that case, *dvoronoi* is about 29% faster on Windows.  

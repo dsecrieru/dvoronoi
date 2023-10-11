@@ -13,11 +13,10 @@ using namespace std::chrono_literals;
 #include <SFML/Graphics.hpp>
 
 #include <dvoronoi/fortune/algorithm.hpp>
-#include <dvoronoi/common/intersect.hpp>
 
 const int width = 1280;
 const int height = 1024;
-const dvoronoi::fortune::config_t config{ dvoronoi::box_t{0, 0, width, height} };
+const dvoronoi::fortune::config_t config{ dvoronoi::box_t{ 0, 0, width, height } };
 const float edge = 100;
 const std::size_t SITES_COUNT = 200;
 
@@ -94,8 +93,9 @@ int main() {
     intersect_box.left += edge;
     intersect_box.right -= edge;
 
-    auto diagram = dvoronoi::fortune::generate(sites, config);
-    dvoronoi::voronoi::intersect(*diagram, intersect_box);
+    using algo = dvoronoi::fortune::algorithm<>;
+    auto diagram = algo::generate(sites, config);
+    algo::clip(*diagram, intersect_box);
     diagram->generate_delaunay();
 
     sf::RenderWindow window(sf::VideoMode(width, height), "dvoronoi");
@@ -149,8 +149,8 @@ int main() {
         }
 
         if (add_sites || sub_sites) {
-            diagram = dvoronoi::fortune::generate(sites, config);
-            dvoronoi::voronoi::intersect(*diagram, intersect_box);
+            diagram = algo::generate(sites, config);
+            algo::clip(*diagram, intersect_box);
             diagram->generate_delaunay();
 
             add_sites = sub_sites = false;
@@ -222,8 +222,8 @@ int main() {
                 }
             }
 
-            diagram = dvoronoi::fortune::generate(sites, config);
-            dvoronoi::voronoi::intersect(*diagram, intersect_box);
+            diagram = algo::generate(sites, config);
+            algo::clip(*diagram, intersect_box);
             diagram->generate_delaunay();
         }
 

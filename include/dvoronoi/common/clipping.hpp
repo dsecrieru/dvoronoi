@@ -2,8 +2,8 @@
 // Created by Daniel Secrieru on 28/09/2023.
 //
 
-#ifndef DVORONOI_INTERSECT_HPP
-#define DVORONOI_INTERSECT_HPP
+#ifndef DVORONOI_CLIPPING_HPP
+#define DVORONOI_CLIPPING_HPP
 
 #include <unordered_set>
 #include <unordered_map>
@@ -13,14 +13,17 @@
 
 namespace dvoronoi::voronoi {
 
-    bool intersect(auto& diag, const box_t& box) {
+    template<typename face_user_data, typename half_edge_user_data>
+    bool clip(auto& diag, const box_t& box) {
+        using half_edge_t = data::half_edge_t<face_user_data, half_edge_user_data>;
+
         bool success = true;
 
         auto removed_vertices = std::unordered_set<std::size_t>{};
         auto removed_half_edges = std::unordered_set<std::size_t>{};
         auto new_vertices = std::list<data::vertex_t>{};
-        auto new_half_edges = std::list<data::half_edge_t>{};
-        auto processed_half_edges = std::unordered_set<data::half_edge_t*>();
+        auto new_half_edges = std::list<half_edge_t>{};
+        auto processed_half_edges = std::unordered_set<half_edge_t*>();
 
         auto create_vertex = [&diag, &new_vertices](const auto& point) {
             return diag.create_vertex(point, new_vertices, diag.vertices.size() + new_vertices.size());
@@ -29,7 +32,7 @@ namespace dvoronoi::voronoi {
             return diag.create_half_edge(face, new_half_edges, diag.half_edges.size() + new_half_edges.size());
         };
 
-        auto link = [&diag, &box, &new_vertices, &create_half_edge](data::half_edge_t* start, std::size_t start_side, data::half_edge_t* end, std::size_t end_side) {
+        auto link = [&diag, &box, &new_vertices, &create_half_edge](half_edge_t* start, std::size_t start_side, half_edge_t* end, std::size_t end_side) {
             auto half_edge = start;
             auto side = start_side;
             while (side != end_side) {
@@ -54,8 +57,8 @@ namespace dvoronoi::voronoi {
             auto inside = box.contains(half_edge->orig->point);
             auto outer_component_dirty = !inside;
 
-            data::half_edge_t* incoming_half_edge = nullptr;
-            data::half_edge_t* outgoing_half_edge = nullptr;
+            half_edge_t* incoming_half_edge = nullptr;
+            half_edge_t* outgoing_half_edge = nullptr;
             auto incoming_side = box_side::Left;
             auto outgoing_side = box_side::Left;
 
@@ -153,20 +156,27 @@ namespace dvoronoi::voronoi {
                 return;
             }
 
-            assert (!removed_vertices.empty());
+            if (removed_vertices.empty())
+                assert (diag.vertices.size() < diag.vertices.capacity());
 
-            auto available = *removed_vertices.begin();
-            removed_vertices.erase(removed_vertices.begin());
+            std::size_t available;
+            if (!removed_vertices.empty()) {
+                available = *removed_vertices.begin();
+                removed_vertices.erase(removed_vertices.begin());
+
+                diag.vertices[available].point = vertex->point;
+            }
+            else
+                available = diag.create_vertex(vertex->point)->index;
 
             swapped_vertices[vertex->index] = available;
 
-            diag.vertices[available].point = vertex->point;
             vertex = &diag.vertices[available];
         };
 
         auto swapped_half_edges = std::unordered_map<std::size_t, std::size_t>{};
 
-        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](data::half_edge_t*& half_edge, const auto& is_invalid) {
+        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](half_edge_t*& half_edge, const auto& is_invalid) {
             if (is_invalid(half_edge))
                 return;
 
@@ -222,7 +232,6 @@ namespace dvoronoi::voronoi {
             return success;
 
         swapped_half_edges.clear();
-        auto to_be_removed_count = removed_half_edges.size();
 
         auto all_indices_valid = [](const auto* half_edge) {
             return !half_edge;
@@ -265,4 +274,4 @@ namespace dvoronoi::voronoi {
 
 }
 
-#endif //DVORONOI_INTERSECT_HPP
+#endif //DVORONOI_CLIPPING_HPP
