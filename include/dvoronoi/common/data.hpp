@@ -5,7 +5,10 @@
 #ifndef EMERGENT_DATA_HPP
 #define EMERGENT_DATA_HPP
 
+#include <optional>
+
 #include "point.hpp"
+#include "util.hpp"
 
 namespace dvoronoi::data {
     typedef _internal::scalar_t scalar_t;
@@ -89,6 +92,39 @@ namespace dvoronoi::data {
 
         return count % 2 == 1;
     }
-}
+
+    static std::optional<point_t> find_intersection(const auto& face, const point_t& p) {
+        const auto& center = face.site->point;
+        auto dir_center = p - center;
+
+        auto he = face.half_edge;
+        do {
+            auto current_he = he;
+            he = he->next;
+
+            auto dir_he = current_he->dest->point - current_he->orig->point;
+            auto cross = dir_center.det(dir_he);
+
+            auto he_orig_to_center = current_he->orig->point - center;
+
+            if (cross == 0) {
+                if (he_orig_to_center.det(dir_center) == 0 && current_he->orig->point.is_between(center, p)) {
+                    return current_he->orig->point;
+                }
+                continue;
+            }
+
+            auto t = he_orig_to_center.det(dir_he) / cross;
+            auto u = he_orig_to_center.det(dir_center) / cross;
+
+            if (util::between_eq(t, 0.0, 1.0) && util::between_eq(u, 0.0, 1.0)) {
+                return point_t{ center.x + t * dir_center.x, center.y + t * dir_center.y };
+            }
+        } while (he != face.half_edge);
+
+        return std::nullopt;
+    }
+
+} // namespace dvoronoi::data
 
 #endif //EMERGENT_DATA_HPP

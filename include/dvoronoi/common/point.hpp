@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "scalar.hpp"
+#include "util.hpp"
 
 namespace dvoronoi::_internal {
 
@@ -27,6 +28,11 @@ namespace dvoronoi::_internal {
         [[nodiscard]] scalar_t det(const point2_t& p) const { return x * p.y - y * p.x; }
         [[nodiscard]] scalar_t dist(const point2_t& p) const { return (*this - p).norm(); }
         [[nodiscard]] scalar_t cross(const point2_t& p1, const point2_t& p2) const { return (p1.x - x) * (p2.y - y) - (p1.y - y) * (p2.x - x); }
+
+        [[nodiscard]] bool is_between(const point2_t& p1, const point2_t& p2) const {
+            return util::between_eq(x, std::min(p1.x, p2.x), std::max(p1.x, p2.x)) &&
+                   util::between_eq(y, std::min(p1.y, p2.y), std::max(p1.y, p2.y));
+        }
     };
 
     static point2_t operator+(point2_t lhs, const point2_t& rhs) {
