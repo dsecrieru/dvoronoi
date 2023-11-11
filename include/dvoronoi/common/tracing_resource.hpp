@@ -6,7 +6,7 @@
 #define TRACING_RESOURCE_HPP
 
 #include <memory_resource>
-#include <ostream>
+#include <iostream>
 
 namespace dvoronoi::memory_management {
 
