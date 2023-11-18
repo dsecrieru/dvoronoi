@@ -7,7 +7,6 @@
 
 #include <optional>
 
-#include "dvoronoi/common/none.hpp"
 #include "dvoronoi/common/box.hpp"
 
 namespace dvoronoi::fortune {

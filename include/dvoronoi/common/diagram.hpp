@@ -10,7 +10,6 @@
 #include <cassert>
 #include <algorithm>
 
-#include "none.hpp"
 #include "data.hpp"
 #include "box.hpp"
 
@@ -20,13 +19,14 @@
 #endif
 
 namespace dvoronoi {
-    template<typename face_user_data, typename half_edge_user_data>
     struct diag_traits {
         typedef data::scalar_t scalar_t;
-        typedef data::site_t<face_user_data, half_edge_user_data> site_t;
-        typedef data::face_t<face_user_data, half_edge_user_data> face_t;
+        typedef data::site_t site_t;
+        typedef data::face_t face_t;
+        typedef data::triangle_t triangle_t;
         typedef data::vertex_t vertex_t;
-        typedef data::half_edge_t<face_user_data, half_edge_user_data> half_edge_t;
+        typedef data::half_edge_t half_edge_t;
+        typedef data::gen_half_edge_t<data::triangle_t> triangle_half_edge_t;
     };
 }
 
@@ -162,13 +162,78 @@ namespace dvoronoi::voronoi {
             convex_hull->resize(k - 1);
         }
 
+        void convert_to_barycentric(const auto& delaunay_diagram) {
+            auto calculate_centroid = [](const auto& triangle) {
+                auto centroid_x =
+                        (triangle.half_edge->orig->point.x +
+                        triangle.half_edge->next->orig->point.x +
+                        triangle.half_edge->next->next->orig->point.x) / diag_traits::scalar_t(3);
+                auto centroid_y =
+                        (triangle.half_edge->orig->point.y +
+                        triangle.half_edge->next->orig->point.y +
+                        triangle.half_edge->next->next->orig->point.y) / diag_traits::scalar_t(3);
+                return data::point_t{centroid_x, centroid_y};
+            };
+
+            for (const auto& triangle: delaunay_diagram->triangles) {
+                auto centroid = calculate_centroid(triangle);
+                triangle.voronoi_vertex->point = centroid;
+            }
+        }
+
     }; // class diagram_t
 
 } // namespace dvoronoi::voronoi
 
+namespace dvoronoi::delaunay {
+
+    template<typename diag_traits>
+    class diagram_t {
+    public:
+        typedef diag_traits::triangle_t triangle_t;
+        typedef diag_traits::vertex_t vertex_t;
+        typedef diag_traits::triangle_half_edge_t half_edge_t;
+
+    public:
+        std::vector<triangle_t> triangles{};
+        std::vector<vertex_t> vertices{};
+        std::vector<half_edge_t> half_edges{};
+
+        explicit diagram_t(std::size_t n) {
+            triangles.reserve(2 * n);
+            vertices.reserve(n);
+            half_edges.reserve(6 * n);
+        }
+
+        triangle_t* create_triangle(vertex_t* voronoi_vertex) {
+            triangles.emplace_back(voronoi_vertex);
+            return &triangles.back();
+        }
+
+        vertex_t* create_vertex(const data::point_t& point) {
+            vertices.emplace_back(vertices.size(), point);
+            return &vertices.back();
+        }
+
+        half_edge_t* create_half_edge(vertex_t* orig, vertex_t* dest, triangle_t* triangle) {
+            half_edges.emplace_back(half_edges.size());
+            auto& he = half_edges.back();
+
+            he.orig = orig;
+            he.dest = dest;
+            he.face = triangle;
+            if (triangle->half_edge == nullptr)
+                triangle->half_edge = &he;
+
+            return &he;
+        }
+    };
+
+} // namespace dvoronoi::delaunay
+
 namespace dvoronoi {
-    template<typename face_user_data, typename half_edge_user_data>
-    using voronoi_diagram_t = voronoi::diagram_t<diag_traits<face_user_data, half_edge_user_data>>;
+    using voronoi_diagram_t = voronoi::diagram_t<diag_traits>;
+    using delaunay_diagram_t = delaunay::diagram_t<diag_traits>;
 
     auto compute_lloyd_relaxation(const auto& diag) -> std::vector<data::point_t> {
         std::vector<data::point_t> sites{};

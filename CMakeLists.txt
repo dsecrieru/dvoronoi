@@ -15,6 +15,7 @@ add_library(dvoronoi INTERFACE
         include/dvoronoi/common/scalar.hpp
         include/dvoronoi/common/point.hpp
         include/dvoronoi/common/util.hpp
+        include/dvoronoi/common/data.hpp
         include/dvoronoi/common/diagram.hpp
         include/dvoronoi/common/box.hpp
         include/dvoronoi/common/priority_queue.hpp

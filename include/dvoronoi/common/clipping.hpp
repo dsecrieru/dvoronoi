@@ -13,9 +13,8 @@
 
 namespace dvoronoi::voronoi {
 
-    template<typename face_user_data, typename half_edge_user_data>
     bool clip(auto& diag, const box_t& box) {
-        using half_edge_t = data::half_edge_t<face_user_data, half_edge_user_data>;
+        using half_edge_t = data::half_edge_t;
 
         bool success = true;
 
