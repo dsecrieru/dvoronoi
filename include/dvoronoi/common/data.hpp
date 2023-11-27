@@ -6,6 +6,7 @@
 #define EMERGENT_DATA_HPP
 
 #include <optional>
+#include <numeric>
 
 #include "point.hpp"
 #include "util.hpp"
@@ -51,6 +52,28 @@ namespace dvoronoi::data {
         vertex_t* voronoi_vertex = nullptr;
         gen_half_edge_t<triangle_t>* half_edge = nullptr;
     };
+
+    static auto get_face_vertices(const face_t& face) {
+        std::vector<point_t> points;
+
+        auto he = face.half_edge;
+        do {
+            points.emplace_back(he->orig->point);
+            he = he->next;
+        } while (he != face.half_edge);
+
+        return points;
+    }
+
+    static auto calculate_face_centroid(const face_t& face) {
+        auto vertices = get_face_vertices(face);
+
+        auto sum = std::accumulate(vertices.begin(), vertices.end(), point_t{scalar_t{}, scalar_t {}}, [](const point_t& a, const point_t& b) {
+            return a + b;
+        });
+
+        return sum / static_cast<double>(vertices.size());
+    }
 
     static bool contains(const auto& face, const point_t& p, bool closed_boundary = true) {
         auto count = 0;
