@@ -167,11 +167,11 @@ namespace dvoronoi::voronoi {
                 auto centroid_x =
                         (triangle.half_edge->orig->point.x +
                         triangle.half_edge->next->orig->point.x +
-                        triangle.half_edge->next->next->orig->point.x) / diag_traits::scalar_t(3);
+                        triangle.half_edge->next->next->orig->point.x) / 3;
                 auto centroid_y =
                         (triangle.half_edge->orig->point.y +
                         triangle.half_edge->next->orig->point.y +
-                        triangle.half_edge->next->next->orig->point.y) / diag_traits::scalar_t(3);
+                        triangle.half_edge->next->next->orig->point.y) / 3;
                 return data::point_t{centroid_x, centroid_y};
             };
 
