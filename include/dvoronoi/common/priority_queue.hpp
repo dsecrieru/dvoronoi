@@ -13,7 +13,7 @@ namespace dvoronoi {
     template<typename T>
     class priority_queue_t {
     private:
-        [[nodiscard]] int parent(std::size_t idx) const { return (idx + 1) / 2 - 1; }
+        [[nodiscard]] std::make_signed_t<std::size_t> parent(std::size_t idx) const { return (idx + 1LL) / 2LL - 1LL; }
         [[nodiscard]] std::size_t left_child(std::size_t idx) const { return 2 * (idx + 1) - 1; }
         [[nodiscard]] std::size_t right_child(std::size_t idx) const { return 2 * (idx + 1); }
 
@@ -26,12 +26,11 @@ namespace dvoronoi {
         }
 
     public:
-        priority_queue_t() {}
+        priority_queue_t() = default;
         explicit priority_queue_t(std::size_t reserve_size) {
             _elements.reserve(reserve_size);
         }
 
-    public:
         [[nodiscard]] bool empty() const { return _elements.empty(); }
         [[nodiscard]] std::size_t size() const { return _elements.size(); }
 
@@ -67,7 +66,7 @@ namespace dvoronoi {
         }
 
         void sift_up(std::size_t idx) {
-            int p = parent(idx);
+            auto p = parent(idx);
             if (p < 0)
                 return;
 

@@ -17,10 +17,10 @@ namespace dvoronoi::fortune::_details {
 
     template<typename diag_traits>
     struct event_t {
-        typedef _internal::point2_t point_t;
-        typedef diag_traits::scalar_t scalar_t;
-        typedef diag_traits::site_t* site_h;
-        typedef data::arc_t<diag_traits> arc_t;
+        using point_t = _internal::point2_t;
+        using  scalar_t = diag_traits::scalar_t;
+        using site_h = diag_traits::site_t*;
+        using arc_t = data::arc_t<diag_traits>;
 
         event_type type;
 

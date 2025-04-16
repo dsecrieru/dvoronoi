@@ -42,11 +42,11 @@ namespace dvoronoi::fortune::_details {
             }
         }
 
-        for (auto& kv : vertices)
-            all_bounded = add_corners(box, linked_vertices, kv.second, diag) && all_bounded;
+        for (auto& [k, cell_vertices] : vertices)
+            all_bounded = add_corners(box, linked_vertices, cell_vertices, diag) && all_bounded;
 
-        for (const auto& kv : vertices)
-            join_half_edges(kv.first, kv.second, diag);
+        for (const auto& [site_index, cell_vertices] : vertices)
+            join_half_edges(site_index, cell_vertices, diag);
 
         return all_bounded;
     }
@@ -65,26 +65,33 @@ namespace dvoronoi::fortune::_details {
         if (direction.x > 0.0) {
             t = (box.right - origin.x) / direction.x;
             intersection.side = box_side::Right;
-            intersection.point = origin + t * direction;
+            intersection.point.x = box.right;
+            intersection.point.y = origin.y + t * direction.y;
         } else if (direction.x < 0.0) {
             t = (box.left - origin.x) / direction.x;
             intersection.side = box_side::Left;
-            intersection.point = origin + t * direction;
+            intersection.point.x = box.left;
+            intersection.point.y = origin.y + t * direction.y;
         }
 
         if (direction.y > 0.0) {
             auto u = (box.top - origin.y) / direction.y;
             if (u < t) {
                 intersection.side = box_side::Top;
-                intersection.point = origin + u * direction;
+                intersection.point.x = origin.x + u * direction.x;
+                intersection.point.y = box.top;
             }
         } else if (direction.y < 0.0) {
             auto u = (box.bottom - origin.y) / direction.y;
             if (u < t) {
                 intersection.side = box_side::Bottom;
-                intersection.point = origin + u * direction;
+                intersection.point.x = origin.x + u * direction.x;
+                intersection.point.y = box.bottom;
             }
         }
+
+        intersection.point.x = std::clamp(intersection.point.x, box.left, box.right);
+        intersection.point.y = std::clamp(intersection.point.y, box.bottom, box.top);
 
         return intersection;
     }

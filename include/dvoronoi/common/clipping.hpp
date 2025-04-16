@@ -18,8 +18,8 @@ namespace dvoronoi::voronoi {
 
         bool success = true;
 
-        auto removed_vertices = std::unordered_set<std::size_t>{};
-        auto removed_half_edges = std::unordered_set<std::size_t>{};
+        auto vertices_to_remove = std::unordered_set<std::size_t>{};
+        auto half_edges_to_remove = std::unordered_set<std::size_t>{};
         auto new_vertices = std::list<data::vertex_t>{};
         auto new_half_edges = std::list<half_edge_t>{};
         auto processed_half_edges = std::unordered_set<half_edge_t*>();
@@ -54,7 +54,7 @@ namespace dvoronoi::voronoi {
             auto half_edge = site.face->half_edge;
 
             auto inside = box.contains(half_edge->orig->point);
-            auto outer_component_dirty = !inside;
+            auto half_edge_dirty = !inside;
 
             half_edge_t* incoming_half_edge = nullptr;
             half_edge_t* outgoing_half_edge = nullptr;
@@ -69,11 +69,11 @@ namespace dvoronoi::voronoi {
 
                 if (!inside && !next_inside) {
                     if (intersections_count == 0) {
-                        removed_vertices.emplace(half_edge->orig->index);
+                        vertices_to_remove.emplace(half_edge->orig->index);
                         half_edge->next = nullptr;
-                        removed_half_edges.emplace(half_edge->index);
+                        half_edges_to_remove.emplace(half_edge->index);
                     } else if (intersections_count == 2) {
-                        removed_vertices.emplace(half_edge->orig->index);
+                        vertices_to_remove.emplace(half_edge->orig->index);
 
                         if (processed_half_edges.find(half_edge->twin) != processed_half_edges.end()) {
                             half_edge->orig = half_edge->twin->dest;
@@ -98,7 +98,7 @@ namespace dvoronoi::voronoi {
                     } else
                         success = false; // this is impossible?
                 } else if (inside && !next_inside) {
-                    if (intersections_count >= 1) {
+                    if (intersections_count == 1) {
                         if (processed_half_edges.find(half_edge->twin) != processed_half_edges.end())
                             half_edge->dest = half_edge->twin->orig;
                         else
@@ -111,8 +111,8 @@ namespace dvoronoi::voronoi {
                     } else
                         success = false;
                 } else if (!inside && next_inside) {
-                    if (intersections_count >= 1) {
-                        removed_vertices.emplace(half_edge->orig->index);
+                    if (intersections_count == 1) {
+                        vertices_to_remove.emplace(half_edge->orig->index);
 
                         if (processed_half_edges.find(half_edge->twin) != processed_half_edges.end())
                             half_edge->orig = half_edge->twin->dest;
@@ -136,60 +136,69 @@ namespace dvoronoi::voronoi {
                 inside = next_inside;
             } while (half_edge != site.face->half_edge);
 
-            if (outer_component_dirty && incoming_half_edge != nullptr)
+            if (half_edge_dirty && incoming_half_edge != nullptr)
                 link(outgoing_half_edge, outgoing_side, incoming_half_edge, incoming_side);
 
-            if (outer_component_dirty)
+            if (half_edge_dirty)
                 site.face->half_edge = incoming_half_edge;
         }
 
         auto swapped_vertices = std::unordered_map<std::size_t, std::size_t>{};
-
-        auto maybe_swap_vertex = [&diag, &removed_vertices, &swapped_vertices](data::vertex_t*& vertex) {
-            if (vertex->index < diag.vertices.size())
+        auto maybe_swap_vertex = [&diag, &vertices_to_remove, &swapped_vertices](data::vertex_t*& vertex) {
+            if (vertex->index < diag.vertices.size()) // this vertex is already in the diagram
                 return;
 
-            const auto& swapped_iter = swapped_vertices.find(vertex->index);
-            if (swapped_iter != swapped_vertices.end()) {
+            if (const auto& swapped_iter = swapped_vertices.find(vertex->index); swapped_iter != swapped_vertices.end()) { // already swapped
                 vertex = &diag.vertices[swapped_iter->second];
                 return;
             }
 
-            if (removed_vertices.empty())
-                assert (diag.vertices.size() < diag.vertices.capacity());
+            if (vertices_to_remove.empty())
+                assert (diag.vertices.size() < diag.vertices.capacity()); // if we need to reallocate, we have a problem because of pointers invalidation
 
             std::size_t available;
-            if (!removed_vertices.empty()) {
-                available = *removed_vertices.begin();
-                removed_vertices.erase(removed_vertices.begin());
+            if (!vertices_to_remove.empty()) { // we have an available vertex, so swap
+                available = *vertices_to_remove.begin();
+                vertices_to_remove.erase(vertices_to_remove.begin());
 
                 diag.vertices[available].point = vertex->point;
             }
             else
-                available = diag.create_vertex(vertex->point)->index;
+                available = diag.create_vertex(vertex->point)->index; // nothing to swap with, so actually create a new vertex
 
             swapped_vertices[vertex->index] = available;
 
             vertex = &diag.vertices[available];
         };
+        for (const auto& he : processed_half_edges) {
+            maybe_swap_vertex(he->orig);
+            maybe_swap_vertex(he->dest);
+        }
+        for (auto& he : new_half_edges) {
+            maybe_swap_vertex(he.orig);
+            maybe_swap_vertex(he.dest);
+        }
 
         auto swapped_half_edges = std::unordered_map<std::size_t, std::size_t>{};
-
-        auto maybe_swap_half_edge = [&diag, &removed_half_edges, &swapped_half_edges](half_edge_t*& half_edge, const auto& is_invalid) {
-            if (is_invalid(half_edge))
+        auto maybe_swap_half_edge = [&diag, &half_edges_to_remove, &swapped_half_edges](half_edge_t*& half_edge, auto is_invalid) {
+            if (is_invalid(half_edge)) // we don't need to do anything
                 return;
 
-            const auto& swapped_iter = swapped_half_edges.find(half_edge->index);
-            if (swapped_iter != swapped_half_edges.end()) {
+            if (const auto& swapped_iter = swapped_half_edges.find(half_edge->index); swapped_iter != swapped_half_edges.end()) { // already swapped
                 half_edge = &diag.half_edges[swapped_iter->second];
                 return;
             }
 
-            if (removed_half_edges.empty())
-                return;
+            if (half_edges_to_remove.empty())
+                assert (diag.half_edges.size() < diag.half_edges.capacity()); // if we need to reallocate, we have a problem because of pointers invalidation
 
-            auto available = *removed_half_edges.begin();
-            removed_half_edges.erase(removed_half_edges.begin());
+            std::size_t available;
+            if (!half_edges_to_remove.empty()) { // we have an available half edge, so swap
+                available = *half_edges_to_remove.begin();
+                half_edges_to_remove.erase(half_edges_to_remove.begin());
+            }
+            else
+                available = diag.create_half_edge(half_edge->face)->index; // nothing to swap with, so actually create a new half edge
 
             swapped_half_edges[half_edge->index] = available;
 
@@ -205,15 +214,6 @@ namespace dvoronoi::voronoi {
             half_edge = &available_he;
         };
 
-        for (const auto& he : processed_half_edges) {
-            maybe_swap_vertex(he->orig);
-            maybe_swap_vertex(he->dest);
-        }
-        for (auto& he : new_half_edges) {
-            maybe_swap_vertex(he.orig);
-            maybe_swap_vertex(he.dest);
-        }
-
         auto index_from_existing_invalid = [max_index = diag.half_edges.size()](const auto* half_edge) {
             return !half_edge || half_edge->index < max_index;
         };
@@ -227,7 +227,7 @@ namespace dvoronoi::voronoi {
             maybe_swap_half_edge(he.prev, index_from_existing_invalid);
         }
 
-        if (removed_half_edges.empty())
+        if (half_edges_to_remove.empty())
             return success;
 
         swapped_half_edges.clear();
@@ -242,7 +242,7 @@ namespace dvoronoi::voronoi {
             auto he_iter = diag.half_edges.rbegin();
             while (he_iter != diag.half_edges.rend()) {
                 if (!he_iter->next) {
-                    removed_half_edges.erase(he_iter->index);
+                    half_edges_to_remove.erase(he_iter->index);
                     diag.half_edges.pop_back();
                     he_iter = diag.half_edges.rbegin();
                     continue;
@@ -252,7 +252,7 @@ namespace dvoronoi::voronoi {
                 break;
             }
 
-            if (removed_half_edges.empty())
+            if (half_edges_to_remove.empty())
                 break;
             assert (to_be_swapped.has_value());
 
@@ -262,6 +262,8 @@ namespace dvoronoi::voronoi {
 
                 if (he.next->index == to_be_swapped.value())
                     maybe_swap_half_edge(he.next, all_indices_valid);
+
+                assert (he.prev != nullptr);
 
                 if (he.prev->index == to_be_swapped.value())
                     maybe_swap_half_edge(he.prev, all_indices_valid);
