@@ -65,6 +65,18 @@ namespace dvoronoi::data {
         return points;
     }
 
+    static auto get_face_edges(const face_t& face) {
+        std::vector<half_edge_t*> edges;
+
+        auto he = face.half_edge;
+        do {
+            edges.emplace_back(he);
+            he = he->next;
+        } while (he != face.half_edge);
+
+        return edges;
+    }
+
     static auto calculate_face_centroid(const face_t& face) {
         auto vertices = get_face_vertices(face);
 

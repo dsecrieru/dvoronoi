@@ -13,6 +13,7 @@ namespace dvoronoi::fortune {
 
     struct config_t {
         std::optional<box_t> bounding_box{};
+        bool clip{false};
     };
 
 }

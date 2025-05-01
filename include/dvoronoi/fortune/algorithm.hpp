@@ -56,8 +56,11 @@ public:
                 handle_circle_event(*event, beach_line, *diagram, event_queue);
         }
 
-        if (config.bounding_box.has_value())
+        if (config.bounding_box.has_value()) {
             bound(*diagram, config.bounding_box.value(), beach_line);
+            if (config.clip)
+                clip(*diagram, config.bounding_box.value());
+        }
 
         return diagram;
     }
