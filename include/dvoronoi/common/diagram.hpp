@@ -9,6 +9,7 @@
 #include <list>
 #include <cassert>
 #include <algorithm>
+#include <memory>
 
 #include "data.hpp"
 #include "box.hpp"
